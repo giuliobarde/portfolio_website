@@ -1544,6 +1544,46 @@ input, select, textarea {
 
 		}
 
+		.timeline{
+			position: relative;
+			max-width: 1200px;
+			margin: 100px auto;
+		}
+
+		.container{
+			padding: 10px 50px;
+			position: relative;
+			width: 50%;
+		}
+
+		.text-box{
+			padding: 20px 30px;
+			background: #fff;
+			position: relative;
+			border-radius: 6px;
+			font-size: 15;
+		}
+
+		.left-container{
+			left: 0;
+		}
+
+		.right-container{
+			left: 50%;
+		}
+
+		.timeline::after{
+			content: '';
+			position: absolute;
+			width: 6px;
+			height: 100%;
+			background: #000;
+			top: 0;
+			left: 50%;
+			margin-left: -3px;
+			z-index: 1;
+		}
+
 /* Image */
 
 	.image {
