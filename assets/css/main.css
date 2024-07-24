@@ -1588,6 +1588,12 @@ input, select, textarea {
 		.container:nth-child(7){
 			animation-delay: 6s;
 		}
+		.container:nth-child(8){
+			animation-delay: 7s;
+		}
+		.container:nth-child(9){
+			animation-delay: 8s;
+		}
 
 		.text-box{
 			padding: 20px 30px;
@@ -2166,7 +2172,7 @@ input, select, textarea {
 						top: 0;
 						left: 0;
 						width: 100%;
-						height: 100%;
+						height: 25em;
 						-moz-object-fit: cover;
 						-webkit-object-fit: cover;
 						-ms-object-fit: cover;
@@ -2252,6 +2258,7 @@ input, select, textarea {
 						#main > .panel.intro .pic {
 							height: 25em;
 							width: 100%;
+							margin-top: 5em;
 						}
 
 						#main > .panel.intro header {
@@ -2265,6 +2272,7 @@ input, select, textarea {
 
 					#main > .panel.intro .pic {
 						height: 20em;
+						margin-top: 5em;
 					}
 
 					#main > .panel.intro header {
@@ -2278,12 +2286,26 @@ input, select, textarea {
 
 				}
 
+				.arrow {
+					display: inline-block;
+					margin: 0 10px;
+				}
+				
+				.icon {
+					font-size: 24px;
+				}
+				
+				.jumplink {
+					text-decoration: none;
+					color: inherit;
+				}
+
 /* Footer */
 
 	#footer {
 		color: rgba(255, 255, 255, 0.45);
 		text-align: center;
-		padding: 2em 0 0 0;
+		padding: 20px;
 		font-size: 0.75em;
 	}
 
@@ -2300,9 +2322,38 @@ input, select, textarea {
 				color: white;
 			}
 
+			#footer .social {
+				display: flex;
+				justify-content: center;
+				list-style: none;
+				padding: 10px;
+				margin: 0;
+			}
+			
+			#footer .social a {
+				display: inline-block;
+				margin: 0 10px;
+				text-decoration: none;
+				font-size: 24px;
+				width: 50px;
+				height: 50px;
+				line-height: 50px;
+				text-align: center;
+				border: 2px solid #c2c2c2;
+				border-radius: 50%;
+				transition: color 0.3s, background-color 0.3s, border-color 0.3s;
+			}
+			
+			#footer .social a:hover {
+				color: #0073b1;
+				background-color: #f0f0f0;
+				border-color: #0073b1;
+			}
+			
+
 		#footer .copyright {
 			list-style: none;
-			padding-left: 0;
+			padding: 10px;
 		}
 
 			#footer .copyright li {
