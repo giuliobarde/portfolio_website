@@ -588,29 +588,31 @@
 
 (function($) {
     function openModal(modalId) {
+        console.log('Opening modal: ' + modalId); // Debugging statement
         $('#' + modalId).show();
     }
 
     function closeModal(modalId) {
+        console.log('Closing modal: ' + modalId); // Debugging statement
         $('#' + modalId).hide();
     }
 
-    // Click event for "Work" and "Projects" items
     $('.text-box').on('click', function() {
         var modalId = 'modal' + $(this).find('h2').text().replace(/\s+/g, '');
+        console.log('Text-box clicked, modalId: ' + modalId); // Debugging statement
         openModal(modalId);
     });
 
-    // Click event to close modal when clicking outside
     $(window).on('click', function(event) {
         if ($(event.target).hasClass('modal')) {
+            console.log('Clicked outside modal, closing modal'); // Debugging statement
             closeModal($(event.target).attr('id'));
         }
     });
 
-    // Close button click event
     $('.close').on('click', function() {
         var modalId = $(this).data('modal');
+        console.log('Close button clicked, modalId: ' + modalId); // Debugging statement
         closeModal(modalId);
     });
 })(jQuery);
