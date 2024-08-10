@@ -1,236 +1,272 @@
 <!DOCTYPE HTML>
 <html>
-<head>
-    <title>Giulio Bardelli</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" href="assets/css/main.css" />
-    <link rel="stylesheet" href="styles.css" />
-    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-    <style>
-        /* Basic Modal Styles */
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgb(0,0,0); 
-            background-color: rgba(0,0,0,0.4); 
-            padding-top: 60px;
-        }
+	<head>
+		<title>Giulio Bardelli</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="styles.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<style>
+			/* Basic Modal Styles */
+			.modal {
+				display: none; 
+				position: fixed; 
+				z-index: 1; 
+				left: 0;
+				top: 0;
+				width: 100%; 
+				height: 100%; 
+				overflow: auto; 
+				background-color: rgb(0,0,0); 
+				background-color: rgba(0,0,0,0.4); 
+				padding-top: 60px;
+			}
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-        }
+			.modal-content {
+				background-color: #fefefe;
+				margin: 5% auto; 
+				padding: 20px;
+				border: 1px solid #888;
+				width: 80%;
+				max-width: 600px;
+			}
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
+			.close {
+				color: #aaa;
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+			}
 
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body class="is-preload">
+			.close:hover,
+			.close:focus {
+				color: black;
+				text-decoration: none;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
 
-    <!-- Wrapper -->
-    <div id="wrapper">
+		<!-- Wrapper -->
+		<div id="wrapper">
 
-        <!-- Nav -->
-        <nav id="nav">
-            <a href="#home" class="icon solid fa-home"><span>Home</span></a>
-            <a href="#work" class="icon solid fa-folder"><span>Work</span></a>
-            <a href="#projects" class="icon solid fa-code"><span>Projects</span></a>
-        </nav>
+			<!-- Nav -->
+			<nav id="nav">
+				<a href="#home" class="icon solid fa-home"><span>Home</span></a>
+				<a href="#work" class="icon solid fa-folder"><span>Work</span></a>
+				<a href="#projects" class="icon solid fa-code"><span>Projects</span></a>
+			</nav>
 
-        <!-- Main -->
-        <div id="main">
+			<!-- Main -->
+			<div id="main">
 
-            <!-- Me -->
-            <article id="home" class="panel intro">
-                <header>
-                    <h1>Giulio Bardelli</h1>
-                    <p>Software Developer</p>
-                    <p>
-                        Hi, my name is Giulio! I'm an international student 
-                        from Italy with a passion for AI, software development/engineering, 
-                        and learning new things.
-                    </p>
-                    <a href="images/Giulio_Bardelli_Resume.pdf" target="_blank">Resume</a>
-                </header>
-                <a href="#work" class="jumplink pic">
-                    <span class="arrow icon solid fa-chevron-right"><span>See my work</span></span>
-                    <img src="images/me.jpg" alt="Giulio Bardelli" />
-                </a>
-            </article>
+				<!-- Me -->
+				<article id="home" class="panel intro">
+					<header>
+						<h1>Giulio Bardelli</h1>
+						<p>Software Developer</p>
+						<p>
+							Hi, my name is Giulio! I'm an international student 
+							from Italy with a passion for AI, software development/engineering, 
+							and learning new things.
+						</p>
+						<a href="images/Giulio_Bardelli_Resume.pdf" target="_blank">Resume</a>
+					</header>
+					<a href="#work" class="jumplink pic">
+						<span class="arrow icon solid fa-chevron-right"><span>See my work</span></span>
+						<img src="images/me.jpg" alt="Giulio Bardelli" />
+					</a>
+				</article>
 
-            <!-- Work -->
-            <article id="work" class="panel">
-                <header>
-                    <h2>Work</h2>
-                </header>
-                <p>Here is a list of some of my coding-related work experience, ranging from research positions to regular jobs and volunteering.</p>
-                <section>
-                    <div class="timeline">
+				<!-- Work -->
+				<article id="work" class="panel">
+					<header>
+						<h2>Work</h2>
+					</header>
+					<p>Here is a list of some of my coding-related work experience, ranging from research positions to regular jobs and volunteering.</p>
+					<section>
+						<div class="timeline">
 
-                        <div class="container left-container">
-                            <div class="text-box" onclick="openModal('modal1')">
-                                <h2>Headstarter AI SWE Fellowship</h2>
-                                <small>07/2024 - Current</small>
-                                <p>
-                                    Currently partaking in the Headstarter AI SWE 
-                                    Fellowship where...
-                                </p>
-                                <span class="left-container-arrow"></span>
-                            </div>
-                        </div>
+							<div class="container left-container">
+								<div class="text-box" onclick="openModal('modal1')">
+									<h2>Headstarter AI SWE Fellowship</h2>
+									<small>07/2024 - Current</small>
+									<p>
+										Currently partaking in the Headstarter AI SWE 
+										Fellowship where...
+									</p>
+									<span class="left-container-arrow"></span>
+								</div>
+							</div>
 
-                        <div class="container right-container">
-                            <div class="text-box" onclick="openModal('modal2')">
-                                <h2>Research Assistant</h2>
-                                <small>05/2024 - Current</small>
-                                <p>
-                                    Currently partaking in research with Dr. Ahmed Elgammal...
-                                </p>
-                                <span class="right-container-arrow"></span>
-                            </div>
-                        </div>
+							<div class="container right-container">
+								<div class="text-box" onclick="openModal('modal2')">
+									<h2>Research Assistant</h2>
+									<small>05/2024 - Current</small>
+									<p>
+										Currently partaking in research with Dr. Ahmed Elgammal...
+									</p>
+									<span class="right-container-arrow"></span>
+								</div>
+							</div>
 
-                        <!-- Add more timeline items here -->
+							<!-- Add more timeline items here -->
 
-                    </div>
-                </section>
-                <a href="#home" class="jumplink pic">
-                    <span class="arrow icon solid fa-chevron-left"><span>Home</span></span>
-                </a>
-                <a href="#projects" class="jumplink pic">
-                    <span class="arrow icon solid fa-chevron-right"><span>See my projects</span></span>
-                </a>
-            </article>
+						</div>
+					</section>
+					<a href="#home" class="jumplink pic">
+						<span class="arrow icon solid fa-chevron-left"><span>Home</span></span>
+					</a>
+					<a href="#projects" class="jumplink pic">
+						<span class="arrow icon solid fa-chevron-right"><span>See my projects</span></span>
+					</a>
+				</article>
 
-            <!-- Projects -->
-            <article id="projects" class="panel">
-                <header>
-                    <h2>Projects</h2>
-                    <p>Here is a list of some of my most recent projects, some of which you can also see on my <a href="https://github.com/giuliobarde">GitHub</a>.</p>
-                </header>
-                <section>
-                    <div class="timeline">
+				<!-- Projects -->
+				<article id="projects" class="panel">
+					<header>
+						<h2>Projects</h2>
+						<p>Here is a list of some of my most recent projects, some of which you can also see on my <a href="https://github.com/giuliobarde">GitHub</a>.</p>
+					</header>
+					<section>
+						<div class="timeline">
 
-                        <div class="container left-container">
-                            <div class="text-box" onclick="openModal('modal3')">
-                                <h2>AI Chatbot</h2>
-                                <small>08/2024</small>
-                                <p>
-                                    Created an AI Chatbot for the third week project 
-                                    of the Headstarter SWE Fellowship...
-                                </p>
-                                <span class="left-container-arrow"></span>
-                            </div>
-                        </div>
+							<div class="container left-container">
+								<div class="text-box" onclick="openModal('modal3')">
+									<h2>AI Chatbot</h2>
+									<small>08/2024</small>
+									<p>
+										Created an AI Chatbot for the third week project 
+										of the Headstarter SWE Fellowship...
+									</p>
+									<span class="left-container-arrow"></span>
+								</div>
+							</div>
 
-                        <div class="container right-container">
-                            <div class="text-box" onclick="openModal('modal4')">
-                                <h2>Pantry App</h2>
-                                <small>07/2024</small>
-                                <p>
-                                    Created a pantry management system of my second 
-                                    week project for the Headstarter SWE Fellowship...
-                                </p>
-                                <span class="right-container-arrow"></span>
-                            </div>
-                        </div>
+							<div class="container right-container">
+								<div class="text-box" onclick="openModal('modal4')">
+									<h2>Pantry App</h2>
+									<small>07/2024</small>
+									<p>
+										Created a pantry management system of my second 
+										week project for the Headstarter SWE Fellowship...
+									</p>
+									<span class="right-container-arrow"></span>
+								</div>
+							</div>
 
-                        <!-- Add more timeline items here -->
+							<!-- Add more timeline items here -->
 
-                    </div>
-                </section>
-                <a href="#work" class="jumplink pic">
-                    <span class="arrow icon solid fa-chevron-left"><span>See my work</span></span>
-                </a>
-            </article>
+						</div>
+					</section>
+					<a href="#work" class="jumplink pic">
+						<span class="arrow icon solid fa-chevron-left"><span>See my work</span></span>
+					</a>
+				</article>
 
-        </div>
-    </div>
+			</div>
+		</div>
 
-    <!-- Footer -->
-    <div id="footer">
-        <ul class="social">
-            <li><a href="https://linkedin.com//in/giulio-bardelli-315b67284/" class="icon brands fa-linkedin" target="_blank"></a></li>
-            <li><a href="https://github.com/giuliobarde" class="icon brands fa-github" target="_blank"></a></li>
-            <li><a href="https://twitter.com/giulio_bardelli" class="icon brands fa-twitter" target="_blank"></a></li>
-        </ul>
-        <ul>
-            <a href="mailto:giuliobarde@gmail.com">giuliobarde@gmail.com</a>
-        </ul>
-        <ul class="copyright">
-            <li>&copy; 2024 Giulio Bardelli.</li>
-            <li>v1.1.0</li>
-            <li>Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a></li>
-        </ul>
-    </div>
+		<!-- Footer -->
+		<div id="footer">
+			<ul class="social">
+				<li><a href="https://linkedin.com//in/giulio-bardelli-315b67284/" class="icon brands fa-linkedin" target="_blank"></a></li>
+				<li><a href="https://github.com/giuliobarde" class="icon brands fa-github" target="_blank"></a></li>
+				<li><a href="https://twitter.com/giulio_bardelli" class="icon brands fa-twitter" target="_blank"></a></li>
+			</ul>
+			<ul>
+				<a href="mailto:giuliobarde@gmail.com">giuliobarde@gmail.com</a>
+			</ul>
+			<ul class="copyright">
+				<li>&copy; 2024 Giulio Bardelli.</li>
+				<li>v1.1.0</li>
+				<li>Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a></li>
+			</ul>
+		</div>
 
-    <!-- Modals -->
-    <div id="modal1" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('modal1')">&times;</span>
-            <h2>Headstarter AI SWE Fellowship</h2>
-            <p>Currently partaking in the Headstarter AI SWE Fellowship where...</p>
-        </div>
-    </div>
+		<!-- Modals -->
+		<div id="modal1" class="modal">
+			<div class="modal-content">
+				<span class="close" onclick="closeModal('modal1')">&times;</span>
+				<div id="modal-content-1">
+					<!-- Content will be updated dynamically -->
+				</div>
+			</div>
+		</div>
 
-    <div id="modal2" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('modal2')">&times;</span>
-            <h2>Research Assistant</h2>
-            <p>Currently partaking in research with Dr. Ahmed Elgammal...</p>
-        </div>
-    </div>
+		<div id="modal2" class="modal">
+			<div class="modal-content">
+				<span class="close" onclick="closeModal('modal2')">&times;</span>
+				<div id="modal-content-2">
+					<!-- Content will be updated dynamically -->
+				</div>
+			</div>
+		</div>
 
-    <!-- Add more modals here for other items -->
+		<div id="modal3" class="modal">
+			<div class="modal-content">
+				<span class="close" onclick="closeModal('modal3')">&times;</span>
+				<div id="modal-content-3">
+					<!-- Content will be updated dynamically -->
+				</div>
+			</div>
+		</div>
 
-    <!-- Scripts -->
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/browser.min.js"></script>
-    <script src="assets/js/breakpoints.min.js"></script>
-    <script src="assets/js/util.js"></script>
-    <script src="assets/js/main.js"></script>
-    <script>
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = "block";
-        }
+		<div id="modal4" class="modal">
+			<div class="modal-content">
+				<span class="close" onclick="closeModal('modal4')">&times;</span>
+				<div id="modal-content-4">
+					<!-- Content will be updated dynamically -->
+				</div>
+			</div>
+		</div>
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = "none";
-        }
+		<!-- Add more modals here for other items -->
 
-        // Close modal when clicking outside of the modal
-        window.onclick = function(event) {
-            var modals = document.getElementsByClassName('modal');
-            for (var i = 0; i < modals.length; i++) {
-                if (event.target === modals[i]) {
-                    modals[i].style.display = "none";
-                }
-            }
-        }
-    </script>
-</body>
+		<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+		<script>
+			const modalContent = {
+				modal1: `<h2>Headstarter AI SWE Fellowship</h2><p>Currently partaking in the Headstarter AI SWE 
+			Fellowship where I will be building a coding 
+			project a week during the first five weeks and 
+			then a final project during the last two weeks.
+			This opportunity will also allow me to practice 
+			interview prep, networking skills, and teamwork, 
+			as starting from the third week the projects will
+			be done as a team.</p>`,
+				modal2: '<h2>Research Assistant</h2><p>Detailed description about the Research Assistant position...</p>',
+				modal3: '<h2>AI Chatbot</h2><p>Detailed description about the AI Chatbot project...</p>',
+				modal4: '<h2>Pantry App</h2><p>Detailed description about the Pantry App project...</p>',
+			};
+
+			function openModal(modalId) {
+				document.getElementById(modalId).style.display = "block";
+				document.getElementById('modal-content-' + modalId.split('modal')[1]).innerHTML = modalContent[modalId];
+			}
+
+			function closeModal(modalId) {
+				document.getElementById(modalId).style.display = "none";
+			}
+
+			// Close modal when clicking outside of it
+			window.onclick = function(event) {
+				const modals = document.querySelectorAll('.modal');
+				modals.forEach(modal => {
+					if (event.target == modal) {
+						closeModal(modal.id);
+					}
+				});
+			}
+		</script>
+
+	</body>
 </html>
 
 
