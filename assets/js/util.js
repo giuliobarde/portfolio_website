@@ -587,32 +587,26 @@
 })(jQuery);
 
 (function($) {
-    function openModal(modalId) {
-        console.log('Opening modal: ' + modalId); // Debugging statement
-        $('#' + modalId).show();
-    }
+    // Function to open modal
+	function openModal(modalId) {
+		document.getElementById(modalId).style.display = "block";
+	}
 
-    function closeModal(modalId) {
-        console.log('Closing modal: ' + modalId); // Debugging statement
-        $('#' + modalId).hide();
-    }
+	// Function to close modal
+	function closeModal(modalId) {
+		document.getElementById(modalId).style.display = "none";
+	}
 
-    $('.text-box').on('click', function() {
-        var modalId = 'modal' + $(this).find('h2').text().replace(/\s+/g, '');
-        console.log('Text-box clicked, modalId: ' + modalId); // Debugging statement
-        openModal(modalId);
-    });
+	// Event listeners for close buttons
+	document.querySelectorAll('.close').forEach(function(element) {
+		element.addEventListener('click', function() {
+			var modalId = this.getAttribute('data-modal');
+			closeModal(modalId);
+		});
+	});
 
-    $(window).on('click', function(event) {
-        if ($(event.target).hasClass('modal')) {
-            console.log('Clicked outside modal, closing modal'); // Debugging statement
-            closeModal($(event.target).attr('id'));
-        }
-    });
-
-    $('.close').on('click', function() {
-        var modalId = $(this).data('modal');
-        console.log('Close button clicked, modalId: ' + modalId); // Debugging statement
-        closeModal(modalId);
-    });
+	// Example of opening a modal (e.g., when a button is clicked)
+	document.getElementById('openModalButton').addEventListener('click', function() {
+		openModal('modalHeadstarterAISWEFellowship');
+	});
 })(jQuery);
