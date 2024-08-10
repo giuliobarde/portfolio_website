@@ -2416,7 +2416,10 @@ input, select, textarea {
 }
 
 .close {
-	display: none;
+	color: #aaa;
+	float: right;
+	font-size: 28px;
+	font-weight: bold;
 }
 
 
