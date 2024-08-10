@@ -585,28 +585,3 @@
 	};
 
 })(jQuery);
-
-(function($) {
-    // Function to open modal
-	function openModal(modalId) {
-		document.getElementById(modalId).style.display = "block";
-	}
-
-	// Function to close modal
-	function closeModal(modalId) {
-		document.getElementById(modalId).style.display = "none";
-	}
-
-	// Event listeners for close buttons
-	document.querySelectorAll('.close').forEach(function(element) {
-		element.addEventListener('click', function() {
-			var modalId = this.getAttribute('data-modal');
-			closeModal(modalId);
-		});
-	});
-
-	// Example of opening a modal (e.g., when a button is clicked)
-	document.getElementById('openModalButton').addEventListener('click', function() {
-		openModal('modalHeadstarterAISWEFellowship');
-	});
-})(jQuery);
