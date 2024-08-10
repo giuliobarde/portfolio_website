@@ -585,3 +585,26 @@
 	};
 
 })(jQuery);
+
+(function($) {
+	function openModal(modalId) {
+		$('#' + modalId).fadeIn();
+	}
+
+	function closeModal(modalId) {
+		$('#' + modalId).fadeOut();
+	}
+
+	// Click event for "Work" and "Projects" items
+	$('.text-box').on('click', function() {
+		var modalId = 'modal' + $(this).find('h2').text().replace(/\s+/g, '');
+		openModal(modalId);
+	});
+
+	// Click event to close modal when clicking outside
+	$(window).on('click', function(event) {
+		if ($(event.target).hasClass('modal')) {
+			closeModal($(event.target).attr('id'));
+		}
+	});
+})(jQuery);
