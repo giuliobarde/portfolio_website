@@ -2390,7 +2390,7 @@ input, select, textarea {
 
 /* Modal styles */
 .modal {
-    display: none;
+    display: none !important;
     position: fixed;
     z-index: 1;
     left: 0;

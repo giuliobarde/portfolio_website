@@ -587,24 +587,30 @@
 })(jQuery);
 
 (function($) {
-	function openModal(modalId) {
-		$('#' + modalId).fadeIn();
-	}
+    function openModal(modalId) {
+        $('#' + modalId).show();
+    }
 
-	function closeModal(modalId) {
-		$('#' + modalId).fadeOut();
-	}
+    function closeModal(modalId) {
+        $('#' + modalId).hide();
+    }
 
-	// Click event for "Work" and "Projects" items
-	$('.text-box').on('click', function() {
-		var modalId = 'modal' + $(this).find('h2').text().replace(/\s+/g, '');
-		openModal(modalId);
-	});
+    // Click event for "Work" and "Projects" items
+    $('.text-box').on('click', function() {
+        var modalId = 'modal' + $(this).find('h2').text().replace(/\s+/g, '');
+        openModal(modalId);
+    });
 
-	// Click event to close modal when clicking outside
-	$(window).on('click', function(event) {
-		if ($(event.target).hasClass('modal')) {
-			closeModal($(event.target).attr('id'));
-		}
-	});
+    // Click event to close modal when clicking outside
+    $(window).on('click', function(event) {
+        if ($(event.target).hasClass('modal')) {
+            closeModal($(event.target).attr('id'));
+        }
+    });
+
+    // Close button click event
+    $('.close').on('click', function() {
+        var modalId = $(this).data('modal');
+        closeModal(modalId);
+    });
 })(jQuery);
