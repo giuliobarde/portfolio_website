@@ -587,24 +587,39 @@
 })(jQuery);
 
 (function($) {
-	function openModal(modalId) {
-		$('#' + modalId).fadeIn();
-	}
+    // Function to open a modal by ID
+    function openModal(modalId) {
+        $('#' + modalId).fadeIn();
+    }
 
-	function closeModal(modalId) {
-		$('#' + modalId).fadeOut();
-	}
+    // Function to close a modal by ID
+    function closeModal(modalId) {
+        $('#' + modalId).fadeOut();
+    }
 
-	// Click event for "Work" and "Projects" items
-	$('.text-box').on('click', function() {
-		var modalId = 'modal' + $(this).find('h2').text().replace(/\s+/g, '');
-		openModal(modalId);
-	});
+    // Click event for "Work" and "Projects" items
+    $('.text-box').on('click', function() {
+        // Use a data attribute to identify the modal
+        var modalId = $(this).data('modal'); // Ensure each .text-box has data-modal attribute
+        if (modalId) {
+            openModal(modalId);
+        } else {
+            console.error('No data-modal attribute found for this element.');
+        }
+    });
 
-	// Click event to close modal when clicking outside
-	$(window).on('click', function(event) {
-		if ($(event.target).hasClass('modal')) {
-			closeModal($(event.target).attr('id'));
-		}
-	});
+    // Click event to close modal when clicking outside
+    $(window).on('click', function(event) {
+        if ($(event.target).hasClass('modal')) {
+            closeModal($(event.target).attr('id'));
+        }
+    });
+
+    // Optional: Close modals when clicking on close button
+    $('.modal .close').on('click', function() {
+        var modalId = $(this).data('modal');
+        if (modalId) {
+            closeModal(modalId);
+        }
+    });
 })(jQuery);
