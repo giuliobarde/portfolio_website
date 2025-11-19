@@ -29,8 +29,7 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (isTransitioningRef.current) {
       return; // Ignore if already transitioning
     }
@@ -40,9 +39,9 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
     setTimeout(() => {
       isTransitioningRef.current = false;
     }, 700); // Match transition duration
-  };
+  }, [itemCount]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (isTransitioningRef.current) {
       return; // Ignore if already transitioning
     }
@@ -52,7 +51,7 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
     setTimeout(() => {
       isTransitioningRef.current = false;
     }, 700); // Match transition duration
-  };
+  }, [itemCount]);
 
   // Handle wheel/trackpad scrolling - one card at a time, horizontal only
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -109,7 +108,7 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
     scrollTimeoutRef.current = setTimeout(() => {
       scrollAccumulatorRef.current = 0;
     }, 150);
-  }, []);
+  }, [handleNext, handlePrev]);
 
   // Add native wheel event listener for better trackpad support
   useEffect(() => {

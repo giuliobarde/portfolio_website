@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import React, { useState } from "react";
-import { Content, KeyTextField, asLink, isFilled } from "@prismicio/client";
+import { Content, KeyTextField, asLink, LinkField } from "@prismicio/client";
 import { PrismicNextLink } from "@prismicio/next";
 import Link from "next/link";
 import Button from "./Button";
@@ -26,7 +26,7 @@ const scrollToSection = (sectionId: string) => {
 
 // Component for navigation links that handle section scrolling
 const NavLink: React.FC<{
-  link: any;
+  link: LinkField;
   label: string;
   pathname: string;
   onClose?: () => void;
@@ -38,27 +38,24 @@ const NavLink: React.FC<{
     let urlString = '';
     if (typeof linkUrl === 'string') {
       urlString = linkUrl;
-    } else if (linkUrl && typeof linkUrl === 'object') {
+    } else if (linkUrl && typeof linkUrl === 'object' && 'url' in linkUrl) {
       // Check for url property
-      urlString = (linkUrl as any)?.url || '';
-      // Also check for link_type and handle text links
-      if ((linkUrl as any)?.link_type === 'Web' && (linkUrl as any)?.url) {
-        urlString = (linkUrl as any).url;
-      } else if ((linkUrl as any)?.link_type === 'Document') {
-        urlString = (linkUrl as any)?.url || '';
+      const urlValue = (linkUrl as { url?: string }).url;
+      if (typeof urlValue === 'string') {
+        urlString = urlValue;
       }
     }
     
     // Also check the raw link object for text content (for 'Any' link type)
     if (!urlString && link && typeof link === 'object') {
-      if (link.link_type === 'Web' && link.url) {
+      if ('link_type' in link && link.link_type === 'Web' && 'url' in link && typeof link.url === 'string') {
         urlString = link.url;
-      } else if (link.link_type === 'Document' && link.url) {
+      } else if ('link_type' in link && link.link_type === 'Document' && 'url' in link && typeof link.url === 'string') {
         urlString = link.url;
-      } else if (link.link_type === 'Any' && link.text) {
+      } else if ('link_type' in link && link.link_type === 'Any' && 'text' in link && typeof link.text === 'string') {
         // Handle 'Any' link type - the hash link is in the 'text' property
         urlString = link.text;
-      } else if (link.text) {
+      } else if ('text' in link && typeof link.text === 'string') {
         // Fallback: check for text property regardless of link_type
         urlString = link.text;
       }
@@ -97,20 +94,23 @@ const NavLink: React.FC<{
   
   if (typeof linkUrl === 'string') {
     urlString = linkUrl;
-  } else if (linkUrl && typeof linkUrl === 'object') {
-    urlString = (linkUrl as any)?.url || '';
+  } else if (linkUrl && typeof linkUrl === 'object' && 'url' in linkUrl) {
+    const urlValue = (linkUrl as { url?: string }).url;
+    if (typeof urlValue === 'string') {
+      urlString = urlValue;
+    }
   }
   
   // Also check raw link object for text/web links
   if (!urlString && link && typeof link === 'object') {
-    if (link.link_type === 'Web' && link.url) {
+    if ('link_type' in link && link.link_type === 'Web' && 'url' in link && typeof link.url === 'string') {
       urlString = link.url;
-    } else if (link.link_type === 'Document' && link.url) {
+    } else if ('link_type' in link && link.link_type === 'Document' && 'url' in link && typeof link.url === 'string') {
       urlString = link.url;
-    } else if (link.link_type === 'Any' && link.text) {
+    } else if ('link_type' in link && link.link_type === 'Any' && 'text' in link && typeof link.text === 'string') {
       // Handle 'Any' link type - the hash link is in the 'text' property
       urlString = link.text;
-    } else if (link.text) {
+    } else if ('text' in link && typeof link.text === 'string') {
       // Fallback: check for text property regardless of link_type
       urlString = link.text;
     }
@@ -274,13 +274,20 @@ function MobileMenu({
       <ul className="flex flex-col py-4">
         {settings.data.nav_item.map(({ link, label }) => {
           const linkUrl = asLink(link);
-          let urlString = typeof linkUrl === 'string' ? linkUrl : (linkUrl as any)?.url || '';
+          let urlString = typeof linkUrl === 'string' ? linkUrl : '';
+          
+          if (typeof linkUrl === 'object' && linkUrl && 'url' in linkUrl) {
+            const urlValue = (linkUrl as { url?: string }).url;
+            if (typeof urlValue === 'string') {
+              urlString = urlValue;
+            }
+          }
           
           // Handle 'Any' link type where hash is in text property
           if (!urlString && link && typeof link === 'object') {
-            if (link.link_type === 'Any' && link.text) {
+            if ('link_type' in link && link.link_type === 'Any' && 'text' in link && typeof link.text === 'string') {
               urlString = link.text;
-            } else if (link.text) {
+            } else if ('text' in link && typeof link.text === 'string') {
               urlString = link.text;
             }
           }
@@ -317,13 +324,20 @@ function MobileMenu({
                   field={link}
                   onClick={(e) => {
                     const linkUrl = asLink(link);
-                    let urlString = typeof linkUrl === 'string' ? linkUrl : (linkUrl as any)?.url || '';
+                    let urlString = typeof linkUrl === 'string' ? linkUrl : '';
+                    
+                    if (typeof linkUrl === 'object' && linkUrl && 'url' in linkUrl) {
+                      const urlValue = (linkUrl as { url?: string }).url;
+                      if (typeof urlValue === 'string') {
+                        urlString = urlValue;
+                      }
+                    }
                     
                     // Handle 'Any' link type where hash is in text property
                     if (!urlString && link && typeof link === 'object') {
-                      if (link.link_type === 'Any' && link.text) {
+                      if ('link_type' in link && link.link_type === 'Any' && 'text' in link && typeof link.text === 'string') {
                         urlString = link.text;
-                      } else if (link.text) {
+                      } else if ('text' in link && typeof link.text === 'string') {
                         urlString = link.text;
                       }
                     }

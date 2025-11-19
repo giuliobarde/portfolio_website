@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Content, asLink, isFilled, RichTextField } from "@prismicio/client";
-import { PrismicRichText, PrismicText } from "@prismicio/react";
+import { Content, asLink, isFilled, RichTextField, LinkField } from "@prismicio/client";
+import { PrismicRichText } from "@prismicio/react";
 import { PrismicNextLink } from "@prismicio/next";
 import Image from "next/image";
 
@@ -17,22 +17,26 @@ const TechStackBadges: React.FC<{ field: RichTextField }> = ({ field }) => {
         
         const items: string[] = [];
         
-        richTextField.forEach((block: any) => {
+        richTextField.forEach((block) => {
             if (block.type === 'paragraph' || block.type === 'heading1' || block.type === 'heading2' || block.type === 'heading3') {
-                block.content?.forEach((span: any) => {
-                    if (span.text && typeof span.text === 'string' && span.text.trim()) {
-                        items.push(span.text.trim());
-                    }
-                });
+                if ('content' in block && Array.isArray(block.content)) {
+                    block.content.forEach((span) => {
+                        if ('text' in span && typeof span.text === 'string' && span.text.trim()) {
+                            items.push(span.text.trim());
+                        }
+                    });
+                }
             } else if (block.type === 'list-item' || block.type === 'o-list-item') {
-                block.content?.forEach((span: any) => {
-                    if (span.text && typeof span.text === 'string' && span.text.trim()) {
-                        items.push(span.text.trim());
-                    }
-                });
+                if ('content' in block && Array.isArray(block.content)) {
+                    block.content.forEach((span) => {
+                        if ('text' in span && typeof span.text === 'string' && span.text.trim()) {
+                            items.push(span.text.trim());
+                        }
+                    });
+                }
             } else if (block.type === 'preformatted') {
                 // Handle preformatted text (often used for comma-separated lists)
-                const text = (block as any).text || '';
+                const text = ('text' in block && typeof block.text === 'string') ? block.text : '';
                 if (typeof text === 'string' && text.includes(',')) {
                     text.split(',').forEach((item: string) => {
                         const trimmed = item.trim();
@@ -117,7 +121,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
         }
         
         // Helper function to extract URL from a link field
-        const extractUrl = (link: any): string | null => {
+        const extractUrl = (link: LinkField): string | null => {
             if (!isFilled.link(link)) {
                 return null;
             }
@@ -155,13 +159,13 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
     const websiteUrl = getWebsiteUrl();
     
     // Helper function to get descriptive label for a link
-    const getLinkLabel = (link: any): string => {
-        const extractUrl = (link: any): string | null => {
-            if (!isFilled.link(link)) {
+    const getLinkLabel = (link: LinkField): string => {
+        const extractUrl = (linkField: LinkField): string | null => {
+            if (!isFilled.link(linkField)) {
                 return null;
             }
             
-            const resolvedLink = asLink(link);
+            const resolvedLink = asLink(linkField);
             if (typeof resolvedLink === 'string') {
                 return resolvedLink;
             }
