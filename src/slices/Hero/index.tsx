@@ -123,8 +123,10 @@ const Hero: FC<HeroProps> = ({ slice }) => {
               tracking-[.2em] 
               text-transparent 
               opacity-0 
-              md:text-4xl"
+              md:text-4xl
+              code-style"
           >
+            <span className="code-comment text-slate-500">// </span>
             {slice.primary.tag_line}
           </span>
         </div>

@@ -7,7 +7,13 @@ export default {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/slices/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  theme: {},
+  theme: {
+    extend: {
+      fontFamily: {
+        mono: ['var(--font-mono)', 'Courier New', 'monospace'],
+      },
+    },
+  },
   plugins: [
     require('@tailwindcss/typography')
   ],

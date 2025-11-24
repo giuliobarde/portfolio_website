@@ -286,7 +286,10 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
 
                     {/* View More Indicator */}
                     <div className="mt-3 flex items-center justify-center gap-2 text-yellow-400/70 group-hover:text-yellow-400 transition-colors duration-300">
-                      <span className="text-xs font-semibold">View Details</span>
+                      <span className="text-xs font-semibold code-style">
+                        <span className="code-keyword">view</span>
+                        <span className="code-bracket">()</span>
+                      </span>
                       <svg 
                         className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
                         fill="none" 
@@ -311,10 +314,10 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
       <div className="flex justify-center items-center gap-6 mt-8">
         <button
           onClick={handlePrev}
-          className="bg-slate-800 text-white px-6 py-3 rounded-md shadow-md hover:bg-slate-600 transition focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-slate-900 font-bold text-lg"
+          className="bg-slate-800 text-white px-6 py-3 rounded-md shadow-md hover:bg-slate-600 transition focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-slate-900 font-bold text-lg code-style border border-slate-700 hover:border-yellow-400/50"
           aria-label="Previous project"
         >
-          ← Prev
+          <span className="code-bracket">{"<"}</span> Prev
         </button>
         <div className="flex items-center gap-2">
           {projectList.map((_, index) => (
@@ -330,10 +333,10 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
         </div>
         <button
           onClick={handleNext}
-          className="bg-slate-800 text-white px-6 py-3 rounded-md shadow-md hover:bg-slate-600 transition focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-slate-900 font-bold text-lg"
+          className="bg-slate-800 text-white px-6 py-3 rounded-md shadow-md hover:bg-slate-600 transition focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-slate-900 font-bold text-lg code-style border border-slate-700 hover:border-yellow-400/50"
           aria-label="Next project"
         >
-          Next →
+          Next <span className="code-bracket">{">"}</span>
         </button>
       </div>
 

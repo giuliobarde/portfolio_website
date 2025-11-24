@@ -182,7 +182,7 @@ export default function NavBar({
 
   return (
     <nav aria-label="Main navigation">
-      <ul className="flex flex-col justify-between rounded-b-lg bg-slate-50 px-4 py-2 md:m-4 md:flex-row md:items-center md:rounded-xl">
+      <ul className="flex flex-col justify-between rounded-b-lg bg-slate-50 px-4 py-2 md:m-4 md:flex-row md:items-center md:rounded-xl border border-slate-200 shadow-sm">
         <div className="flex items-center justify-between w-full md:w-auto">
             <NameLogo name={settings.data.name} />
             <button
@@ -215,9 +215,11 @@ function NameLogo({ name }: { name: KeyTextField }) {
     <Link
       href="/"
       aria-label="Home page"
-      className="text-xl font-extrabold tracking-tighter text-slate-900"
+      className="text-xl font-extrabold tracking-tighter text-slate-900 mono code-style"
     >
+      <span className="code-bracket">{"{"}</span>
       {name}
+      <span className="code-bracket">{"}"}</span>
     </Link>
   );
 }
@@ -238,7 +240,7 @@ function DesktopMenu({
           </li>
           {index < settings.data.nav_item.length - 1 && (
             <span
-              className="hidden text-4xl font-thin leading-[0] text-slate-400 md:inline"
+              className="hidden text-4xl font-thin leading-[0] text-slate-400 md:inline cs-separator"
               aria-hidden="true"
             >
               /

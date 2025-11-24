@@ -41,50 +41,63 @@ function Geometries() {
         {
             position: [0, 0, 0],
             r: 0.3,
-            geometry: new THREE.IcosahedronGeometry(3), // Gem
+            geometry: new THREE.BoxGeometry(2.5, 2.5, 0.3), // Code block / Terminal window
+            wireframe: true,
         },
         {
             position: [1.6,1.6,-4],
             r: 0.5,
-            geometry: new THREE.TorusKnotGeometry(1), // Rope
+            geometry: new THREE.OctahedronGeometry(1.2), // Network node / Data structure
+            wireframe: true,
         },
         {
             position: [-0.8, -0.5, 5],
             r: 1,
-            geometry: new THREE.TorusGeometry(0.6, 0.25, 16, 32), // Donut
+            geometry: new THREE.TetrahedronGeometry(1.1), // Algorithm flow / Data processing
+            wireframe: true,
         },
         {
             position: [1,-0.75,4],
             r: 0.7,
-            geometry: new THREE.CapsuleGeometry(0.5, 1.6, 2, 16), // Pill
+            geometry: new THREE.BoxGeometry(1.2, 1.2, 1.2), // Code bracket / Block
+            wireframe: true,
         },
         {
             position: [-1.4, 2, -4],
             r: 1,
-            geometry: new THREE.SphereGeometry(1.5), // Ball
+            geometry: new THREE.IcosahedronGeometry(1.2), // Circuit pattern / Chip
+            wireframe: true,
+        },
+        {
+            position: [0.5, -1.5, 3],
+            r: 0.6,
+            geometry: new THREE.CylinderGeometry(0.4, 0.4, 2, 8), // Binary digit / Data stream
+            wireframe: true,
         },
     ];
 
-    const materials = [
-        new THREE.MeshStandardMaterial({ color:0x2ecc71, roughness:0, metalness:1 }),
-        new THREE.MeshStandardMaterial({ color:0xf1c40f, roughness:0.4, metalness:1 }),
-        new THREE.MeshStandardMaterial({ color:0xe74c3c, roughness:0.1, metalness:1 }),
-        new THREE.MeshStandardMaterial({ color:0x8e44ad, roughness:0, metalness:1 }),
-        new THREE.MeshStandardMaterial({ color:0x253342, roughness:0, metalness:1 }),
+    const wireframeMaterials = [
+        new THREE.MeshStandardMaterial({ color:0x00d4ff, wireframe: true, emissive:0x00d4ff, emissiveIntensity:0.5 }),
+        new THREE.MeshStandardMaterial({ color:0x00ff88, wireframe: true, emissive:0x00ff88, emissiveIntensity:0.5 }),
+        new THREE.MeshStandardMaterial({ color:0x4a90e2, wireframe: true, emissive:0x4a90e2, emissiveIntensity:0.5 }),
+        new THREE.MeshStandardMaterial({ color:0xff6b6b, wireframe: true, emissive:0xff6b6b, emissiveIntensity:0.5 }),
+        new THREE.MeshStandardMaterial({ color:0xffd93d, wireframe: true, emissive:0xffd93d, emissiveIntensity:0.5 }),
+        new THREE.MeshStandardMaterial({ color:0x9b59b6, wireframe: true, emissive:0x9b59b6, emissiveIntensity:0.5 }),
     ];
 
-    return geometries.map(({position, r, geometry}) => (
+    return geometries.map(({position, r, geometry, wireframe}, index) => (
         <Geometry 
             key={JSON.stringify(position)}
             position={position.map((p) => p*2)}
             geometry={geometry}
-            materials={materials}
+            materials={wireframeMaterials}
+            wireframe={wireframe}
             r={r}
         />
     ))
 }
 
-function Geometry({r, position, geometry, materials}){
+function Geometry({r, position, geometry, materials, wireframe}){
     const meshRef = useRef()
     const [visible, setVisible] = useState(false)
 
@@ -173,6 +186,7 @@ function Geometry({r, position, geometry, materials}){
                     onPointerOut={handlePointerOut}
                     visible={visible}
                     material={startingMaterial}
+                    rotation={[Math.PI / 4, Math.PI / 4, 0]}
                 />
             </Float>
         </group>

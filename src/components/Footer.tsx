@@ -18,26 +18,29 @@ export default async function Footer() {
         <div className="name flex flex-col items-center justify-center gap-x-4 gap-y-2 sm:flex-row sm:justify-self-start">
           <Link
             href="/"
-            className="text-xl font-extrabold tracking-tighter text-slate-100 transition-colors duration-150 hover:text-yellow-400"
+            className="text-xl font-extrabold tracking-tighter text-slate-100 transition-colors duration-150 hover:text-yellow-400 code-style"
           >
+            <span className="code-bracket text-yellow-400/60">{"{"}</span>
             {settings.data.name}
+            <span className="code-bracket text-yellow-400/60">{"}"}</span>
           </Link>
           <span
-            className="hidden text-5xl font-extralight leading-[0] text-slate-400 sm:inline"
+            className="hidden text-5xl font-extralight leading-[0] text-slate-400 sm:inline cs-separator"
             aria-hidden={true}
           >
             /
           </span>
-          <p className=" text-sm text-slate-300 ">
+          <p className="text-sm text-slate-300 code-style">
+            <span className="code-comment">// </span>
             © {new Date().getFullYear()} {settings.data.name}
           </p>
           <span
-            className="hidden text-5xl font-extralight leading-[0] text-slate-400 sm:inline"
+            className="hidden text-5xl font-extralight leading-[0] text-slate-400 sm:inline cs-separator"
             aria-hidden={true}
           >
             /
           </span>
-          <p className=" text-sm text-slate-300 ">
+          <p className="text-sm text-slate-300 code-style">
             {settings.data.version}
           </p>
         </div>
@@ -57,7 +60,7 @@ export default async function Footer() {
                 </li>
                 {index < settings.data.nav_item.length - 1 && (
                   <span
-                    className="text-4xl font-thin leading-[0] text-slate-400"
+                    className="text-4xl font-thin leading-[0] text-slate-400 cs-separator"
                     aria-hidden="true"
                   >
                     /
