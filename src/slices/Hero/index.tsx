@@ -126,7 +126,7 @@ const Hero: FC<HeroProps> = ({ slice }) => {
               md:text-4xl
               code-style"
           >
-            <span className="code-comment text-slate-500">// </span>
+            <span className="code-comment text-slate-500">{"// "}</span>
             {slice.primary.tag_line}
           </span>
         </div>

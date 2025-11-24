@@ -10,22 +10,24 @@ type wordSphereProps = {
 
 const WordSphere: React.FC<wordSphereProps> = ({ wordList, sphereSize }) => {
   const containerRef = useRef<HTMLSpanElement>(null);
-  const tagCloudInstanceRef = useRef<any>(null);
+  const tagCloudInstanceRef = useRef<ReturnType<typeof TagCloud> | null>(null);
   const hoverHandlersRef = useRef<Map<HTMLElement, { enter: () => void; leave: () => void }>>(new Map());
 
   useEffect(() => {
-    if (!containerRef.current || wordList.length === 0) return;
+    const container = containerRef.current;
+    const handlersMap = hoverHandlersRef.current;
+    if (!container || wordList.length === 0) return;
 
     // Cleanup previous instance and event listeners
-    if (containerRef.current.innerHTML) {
+    if (container.innerHTML) {
       // Remove old event listeners
-      hoverHandlersRef.current.forEach((handlers, element) => {
+      handlersMap.forEach((handlers, element) => {
         element.removeEventListener("mouseenter", handlers.enter);
         element.removeEventListener("mouseleave", handlers.leave);
       });
-      hoverHandlersRef.current.clear();
+      handlersMap.clear();
       
-      containerRef.current.innerHTML = "";
+      container.innerHTML = "";
       tagCloudInstanceRef.current = null;
     }
 
@@ -45,16 +47,15 @@ const WordSphere: React.FC<wordSphereProps> = ({ wordList, sphereSize }) => {
       maxSpeed: "slow",
       initSpeed: "normal",
       keep: true,
-      direction: 135, // Direction of rotation (degrees)
       useHTML: true,
     };
 
     // Initialize the TagCloud
-    tagCloudInstanceRef.current = TagCloud([containerRef.current], wordList, options);
+    tagCloudInstanceRef.current = TagCloud([container], wordList, options);
 
     // Wait a bit for tags to be rendered, then apply styling
     const applyStyling = () => {
-      const tagElements = containerRef.current?.querySelectorAll("span");
+      const tagElements = container?.querySelectorAll("span");
       if (!tagElements || tagElements.length === 0) return;
 
       tagElements.forEach((tag, index) => {
@@ -92,7 +93,7 @@ const WordSphere: React.FC<wordSphereProps> = ({ wordList, sphereSize }) => {
         element.addEventListener("mouseleave", handleMouseLeave);
         
         // Store handlers for cleanup
-        hoverHandlersRef.current.set(element, {
+        handlersMap.set(element, {
           enter: handleMouseEnter,
           leave: handleMouseLeave,
         });
@@ -106,15 +107,15 @@ const WordSphere: React.FC<wordSphereProps> = ({ wordList, sphereSize }) => {
     return () => {
       clearTimeout(timeoutId);
       
-      // Remove event listeners
-      hoverHandlersRef.current.forEach((handlers, element) => {
+      // Remove event listeners using captured refs
+      handlersMap.forEach((handlers, element) => {
         element.removeEventListener("mouseenter", handlers.enter);
         element.removeEventListener("mouseleave", handlers.leave);
       });
-      hoverHandlersRef.current.clear();
+      handlersMap.clear();
       
-      if (containerRef.current) {
-        containerRef.current.innerHTML = "";
+      if (container) {
+        container.innerHTML = "";
         tagCloudInstanceRef.current = null;
       }
     };
