@@ -134,7 +134,7 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
     }
   }, []);
 
-  const handleTouchEnd = useCallback((e: TouchEvent) => {
+  const handleTouchEnd = useCallback(() => {
     if (!touchStartRef.current || !touchMoveRef.current || isTransitioningRef.current) {
       touchStartRef.current = null;
       touchMoveRef.current = null;
