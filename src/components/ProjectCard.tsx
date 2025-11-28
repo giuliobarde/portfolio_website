@@ -19,6 +19,8 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
   const scrollAccumulatorRef = useRef(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isTransitioningRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchMoveRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -110,6 +112,53 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
     }, 150);
   }, [handleNext, handlePrev]);
 
+  // Handle touch/swipe gestures for mobile
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    if (isTransitioningRef.current) return;
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    touchMoveRef.current = null;
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!touchStartRef.current || isTransitioningRef.current) return;
+    const touch = e.touches[0];
+    touchMoveRef.current = { x: touch.clientX, y: touch.clientY };
+    
+    const deltaX = touchMoveRef.current.x - touchStartRef.current.x;
+    const deltaY = touchMoveRef.current.y - touchStartRef.current.y;
+    
+    // Only prevent default if horizontal swipe is dominant
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      e.preventDefault();
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (!touchStartRef.current || !touchMoveRef.current || isTransitioningRef.current) {
+      touchStartRef.current = null;
+      touchMoveRef.current = null;
+      return;
+    }
+
+    const deltaX = touchMoveRef.current.x - touchStartRef.current.x;
+    const deltaY = touchMoveRef.current.y - touchStartRef.current.y;
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
+
+    // Only trigger swipe if horizontal movement is dominant and significant
+    if (absDeltaX > absDeltaY && absDeltaX > 50) {
+      if (deltaX > 0) {
+        handlePrev();
+      } else {
+        handleNext();
+      }
+    }
+
+    touchStartRef.current = null;
+    touchMoveRef.current = null;
+  }, [handleNext, handlePrev]);
+
   // Add native wheel event listener for better trackpad support
   useEffect(() => {
     const carouselElement = carouselRef.current;
@@ -129,6 +178,22 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
       }
     };
   }, [handleWheel, itemCount]);
+
+  // Add touch event listeners for mobile swipe support
+  useEffect(() => {
+    const carouselElement = carouselRef.current;
+    if (!carouselElement || itemCount === 0) return;
+
+    carouselElement.addEventListener("touchstart", handleTouchStart, { passive: true });
+    carouselElement.addEventListener("touchmove", handleTouchMove, { passive: false });
+    carouselElement.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      carouselElement.removeEventListener("touchstart", handleTouchStart);
+      carouselElement.removeEventListener("touchmove", handleTouchMove);
+      carouselElement.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd, itemCount]);
 
   const openModal = (item: Content.ProjectsSliceDefaultPrimaryProjectsItem) => {
     setSelectedProject(item);
