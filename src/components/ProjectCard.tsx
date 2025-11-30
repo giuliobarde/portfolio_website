@@ -384,18 +384,20 @@ const ProjectCards: React.FC<ProjectCardProps> = ({ projectList = [] }) => {
         >
           <span className="code-bracket">{"<"}</span> Prev
         </button>
-        <div className="flex items-center gap-2">
-          {projectList.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`h-3 w-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                index === currentIndex ? "bg-yellow-400 scale-125" : "bg-slate-600 hover:bg-slate-500"
-              }`}
-              aria-label={`Go to project ${index + 1}`}
-            />
-          ))}
-        </div>
+        {!isMobile && (
+          <div className="flex items-center gap-2">
+            {projectList.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`h-3 w-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                  index === currentIndex ? "bg-yellow-400 scale-125" : "bg-slate-600 hover:bg-slate-500"
+                }`}
+                aria-label={`Go to project ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
         <button
           onClick={handleNext}
           className="bg-slate-800 text-white px-6 py-3 rounded-md shadow-md hover:bg-slate-600 transition focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-slate-900 font-bold text-lg code-style border border-slate-700 hover:border-yellow-400/50"
