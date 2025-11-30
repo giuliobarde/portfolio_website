@@ -128,7 +128,7 @@ const NavLink: React.FC<{
         href={urlString}
         onClick={handleClick}
         className={clsx(
-          "group relative block overflow-hidden rounded px-3 py-1 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 cursor-pointer",
+          "group relative block overflow-hidden rounded px-3 py-2 md:py-1 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 cursor-pointer",
         )}
         aria-current={isActive ? "page" : undefined}
       >
@@ -147,7 +147,7 @@ const NavLink: React.FC<{
   return (
     <PrismicNextLink
       className={clsx(
-        "group relative block overflow-hidden rounded px-3 py-1 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2",
+        "group relative block overflow-hidden rounded px-3 py-2 md:py-1 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2",
       )}
       field={link}
       onClick={handleClick}

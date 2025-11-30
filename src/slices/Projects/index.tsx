@@ -26,7 +26,7 @@ const Projects: FC<ProjectsProps> = ({ slice }) => {
         {/* Title & Description */}
         <div className="w-full max-w-4xl text-center space-y-4 mb-4"> {/* Reduced mb-8 to mb-4 */}
           <Heading as="h2" size="lg">{slice.primary.heading}</Heading>
-          <div className="prose prose-xl prose-slate prose-invert mx-auto">
+          <div className="prose prose-lg md:prose-xl prose-slate prose-invert mx-auto">
             <PrismicRichText field={slice.primary.decsription} />
           </div>
         </div>

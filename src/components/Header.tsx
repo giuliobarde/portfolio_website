@@ -10,7 +10,7 @@ export default async function Header() {
                         {settings.data.name}
                     </Link>*/
     return (
-        <header className="top-0 z-50 mx-auto max-w-7xl md:sticky md:top-4">
+        <header className="sticky top-0 md:top-4 z-50 mx-auto max-w-7xl">
             <NavBar settings={settings} />
         </header>
 )

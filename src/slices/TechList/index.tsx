@@ -24,9 +24,11 @@ const TechList: React.FC<{ slice: TechListSliceProps }> = ({ slice }) => {
 
       let newSize: number;
       if (width >= 768) {
-        newSize = width / 4;
+        // Desktop: width/4, with min 300px and max 500px
+        newSize = Math.min(Math.max(width / 4, 300), 500);
       } else {
-        newSize = width / 2.3;
+        // Mobile: width/2.3, with min 200px and max 350px
+        newSize = Math.min(Math.max(width / 2.3, 200), 350);
       }
 
       setSphereSize((prevSize) => {
@@ -58,7 +60,7 @@ const TechList: React.FC<{ slice: TechListSliceProps }> = ({ slice }) => {
           <Heading as="h2" size="lg">
             {slice.primary.heading}
           </Heading>
-          <div className="prose prose-xl prose-slate prose-invert">
+          <div className="prose prose-lg md:prose-xl prose-slate prose-invert">
             <PrismicRichText field={slice.primary.tech_description} />
           </div>
         </div>

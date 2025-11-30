@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Content, asLink, isFilled, RichTextField, LinkField } from "@prismicio/client";
-import { PrismicRichText } from "@prismicio/react";
+import { Content, asLink, isFilled, RichTextField } from "@prismicio/client";
+import { PrismicRichText, PrismicText } from "@prismicio/react";
 import { PrismicNextLink } from "@prismicio/next";
 import Image from "next/image";
 
@@ -17,26 +17,22 @@ const TechStackBadges: React.FC<{ field: RichTextField }> = ({ field }) => {
         
         const items: string[] = [];
         
-        richTextField.forEach((block) => {
+        richTextField.forEach((block: any) => {
             if (block.type === 'paragraph' || block.type === 'heading1' || block.type === 'heading2' || block.type === 'heading3') {
-                if ('content' in block && Array.isArray(block.content)) {
-                    block.content.forEach((span) => {
-                        if ('text' in span && typeof span.text === 'string' && span.text.trim()) {
-                            items.push(span.text.trim());
-                        }
-                    });
-                }
+                block.content?.forEach((span: any) => {
+                    if (span.text && typeof span.text === 'string' && span.text.trim()) {
+                        items.push(span.text.trim());
+                    }
+                });
             } else if (block.type === 'list-item' || block.type === 'o-list-item') {
-                if ('content' in block && Array.isArray(block.content)) {
-                    block.content.forEach((span) => {
-                        if ('text' in span && typeof span.text === 'string' && span.text.trim()) {
-                            items.push(span.text.trim());
-                        }
-                    });
-                }
+                block.content?.forEach((span: any) => {
+                    if (span.text && typeof span.text === 'string' && span.text.trim()) {
+                        items.push(span.text.trim());
+                    }
+                });
             } else if (block.type === 'preformatted') {
                 // Handle preformatted text (often used for comma-separated lists)
-                const text = ('text' in block && typeof block.text === 'string') ? block.text : '';
+                const text = (block as any).text || '';
                 if (typeof text === 'string' && text.includes(',')) {
                     text.split(',').forEach((item: string) => {
                         const trimmed = item.trim();
@@ -121,7 +117,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
         }
         
         // Helper function to extract URL from a link field
-        const extractUrl = (link: LinkField): string | null => {
+        const extractUrl = (link: any): string | null => {
             if (!isFilled.link(link)) {
                 return null;
             }
@@ -159,13 +155,13 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
     const websiteUrl = getWebsiteUrl();
     
     // Helper function to get descriptive label for a link
-    const getLinkLabel = (link: LinkField): string => {
-        const extractUrl = (linkField: LinkField): string | null => {
-            if (!isFilled.link(linkField)) {
+    const getLinkLabel = (link: any): string => {
+        const extractUrl = (link: any): string | null => {
+            if (!isFilled.link(link)) {
                 return null;
             }
             
-            const resolvedLink = asLink(linkField);
+            const resolvedLink = asLink(link);
             if (typeof resolvedLink === 'string') {
                 return resolvedLink;
             }
@@ -348,7 +344,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
                             <div className="space-y-6">
                                 {/* Live Website Preview or Static Image - Only show if there's a website URL or project image */}
                                 {(websiteUrl || project.project_image?.url) && (
-                                    <div className="hidden md:block">
+                                    <div>
                                         <h3 className="text-lg font-semibold text-yellow-400 mb-3">
                                             {websiteUrl ? "Live Preview" : "Preview"}
                                         </h3>
@@ -393,18 +389,21 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
                                                     </div>
                                                 </div>
                                             </div>
-                                        ) : project.project_image?.url ? (
+                                        ) : null}
+
+                                        {/* Fallback: Show project image only if no website URL or iframe error */}
+                                        {project.project_image?.url && (!websiteUrl || iframeError) && (
                                             <div className="relative w-full h-48 rounded-xl overflow-hidden group">
                                                 <Image
                                                     src={project.project_image.url}
                                                     alt={project.project_image.alt ?? "Project Image"}
                                                     fill
                                                     className="object-cover"
-                                                    sizes="(max-width: 768px) 0px, 384px"
+                                                    sizes="(max-width: 768px) 90vw, 384px"
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-800/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                             </div>
-                                        ) : null}
+                                        )}
                                         
                                         {iframeError && websiteUrl && (
                                             <div className="mt-2 p-3 rounded-lg bg-yellow-400/10 border border-yellow-400/20">

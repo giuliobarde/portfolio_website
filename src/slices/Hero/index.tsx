@@ -95,7 +95,7 @@ const Hero: FC<HeroProps> = ({ slice }) => {
       data-slice-variation={slice.variation}
       ref={component}
     >
-      <div className="grid min-h-[70vh] grid-cols-1 md:grid-cols-2 items-center">
+      <div className="grid min-h-[50vh] md:min-h-[70vh] grid-cols-1 md:grid-cols-2 items-center">
         <Shapes />
         <div className="col-start-1 md:row-start-1">
           <h1
@@ -130,7 +130,6 @@ const Hero: FC<HeroProps> = ({ slice }) => {
             {slice.primary.tag_line}
           </span>
         </div>
-        <div className="h-[20vh]"></div>
       </div>
     </Bounded>
   );
