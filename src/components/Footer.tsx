@@ -31,7 +31,7 @@ export default async function Footer() {
             /
           </span>
           <p className="text-sm text-slate-300 code-style">
-            <span className="code-comment">// </span>
+            <span className="code-comment">{"// "}</span>
             © {new Date().getFullYear()} {settings.data.name}
           </p>
           <span
