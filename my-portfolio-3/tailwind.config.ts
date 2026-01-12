@@ -6,8 +6,6 @@ export default {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/slices/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/v3/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/slices/v3/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {

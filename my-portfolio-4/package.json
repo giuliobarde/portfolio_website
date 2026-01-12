@@ -27,6 +27,7 @@
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
     "tag-cloud": "^2.0.2",
+    "tagcloud": "^1.1.0-1",
     "TagCloud": "^2.5.0",
     "three": "^0.173.0"
   },
@@ -43,6 +44,6 @@
     "postcss": "^8",
     "slice-machine-ui": "^2.12.3",
     "tailwindcss": "^3.4.1",
-    "typescript": "5.9.3"
+    "typescript": "^5"
   }
 }
