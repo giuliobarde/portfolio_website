@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Urbanist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import ConditionalHeader from "@/components/ConditionalHeader";
+import ConditionalFooter from "@/components/ConditionalFooter";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ScrollHandler from "@/components/ScrollHandler";
@@ -48,14 +48,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-slate-900 text-slate-100">
+    <html lang="en" className="bg-slate-900 text-slate-100" suppressHydrationWarning>
       <body
         className={`${urbanist.variable} ${jetbrainsMono.variable} ${urbanist.className}`}
       >
         <ScrollHandler />
-        <Header />
+        <ConditionalHeader />
         {children}
-        <Footer />
+        <ConditionalFooter />
         <Analytics />
         <SpeedInsights />
       </body>
