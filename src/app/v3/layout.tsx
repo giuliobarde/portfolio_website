@@ -1,22 +1,8 @@
 import type { Metadata } from "next";
-import { Urbanist, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import Header from "@/components/v3/Header";
 import Footer from "@/components/v3/Footer";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import ScrollHandler from "@/components/v3/ScrollHandler";
-
-const urbanist = Urbanist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -48,17 +34,11 @@ export default function V3Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-slate-900 text-slate-100">
-      <body
-        className={`${urbanist.variable} ${jetbrainsMono.variable} ${urbanist.className}`}
-      >
-        <ScrollHandler />
-        <Header />
-        {children}
-        <Footer />
-        <Analytics />
-        <SpeedInsights />
-      </body>
-    </html>
+    <>
+      <ScrollHandler />
+      <Header />
+      {children}
+      <Footer />
+    </>
   );
 }
