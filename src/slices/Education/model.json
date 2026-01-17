@@ -1,0 +1,16 @@
+{
+  "id": "education",
+  "type": "SharedSlice",
+  "name": "Education",
+  "description": "Education",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": ""
+    }
+  ]
+}

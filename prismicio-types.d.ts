@@ -522,6 +522,36 @@ export type BiographySlice = prismic.SharedSlice<
 >;
 
 /**
+ * Default variation for Education Slice
+ *
+ * - **API ID**: `default`
+ * - **Description**: Default
+ * - **Documentation**: https://prismic.io/docs/slice
+ */
+export type EducationSliceDefault = prismic.SharedSliceVariation<
+  "default",
+  Record<string, never>,
+  never
+>;
+
+/**
+ * Slice variation for *Education*
+ */
+type EducationSliceVariation = EducationSliceDefault;
+
+/**
+ * Education Shared Slice
+ *
+ * - **API ID**: `education`
+ * - **Description**: Education
+ * - **Documentation**: https://prismic.io/docs/slice
+ */
+export type EducationSlice = prismic.SharedSlice<
+  "education",
+  EducationSliceVariation
+>;
+
+/**
  * Primary content in *Hero → Default → Primary*
  */
 export interface HeroSliceDefaultPrimary {
@@ -849,6 +879,36 @@ export type TechListSlice = prismic.SharedSlice<
   TechListSliceVariation
 >;
 
+/**
+ * Default variation for WorkExperience Slice
+ *
+ * - **API ID**: `default`
+ * - **Description**: Default
+ * - **Documentation**: https://prismic.io/docs/slice
+ */
+export type WorkExperienceSliceDefault = prismic.SharedSliceVariation<
+  "default",
+  Record<string, never>,
+  never
+>;
+
+/**
+ * Slice variation for *WorkExperience*
+ */
+type WorkExperienceSliceVariation = WorkExperienceSliceDefault;
+
+/**
+ * WorkExperience Shared Slice
+ *
+ * - **API ID**: `work_experience`
+ * - **Description**: WorkExperience
+ * - **Documentation**: https://prismic.io/docs/slice
+ */
+export type WorkExperienceSlice = prismic.SharedSlice<
+  "work_experience",
+  WorkExperienceSliceVariation
+>;
+
 declare module "@prismicio/client" {
   interface CreateClient {
     (
@@ -884,6 +944,9 @@ declare module "@prismicio/client" {
       BiographySliceDefaultPrimary,
       BiographySliceVariation,
       BiographySliceDefault,
+      EducationSlice,
+      EducationSliceVariation,
+      EducationSliceDefault,
       HeroSlice,
       HeroSliceDefaultPrimary,
       HeroSliceVariation,
@@ -898,6 +961,9 @@ declare module "@prismicio/client" {
       TechListSliceDefaultPrimary,
       TechListSliceVariation,
       TechListSliceDefault,
+      WorkExperienceSlice,
+      WorkExperienceSliceVariation,
+      WorkExperienceSliceDefault,
     };
   }
 }
