@@ -6,23 +6,17 @@ import { PrismicRichText, SliceComponentProps } from "@prismicio/react";
 import { motion } from "framer-motion";
 import ProjectCarousel from "@/components/v4/ProjectCarousel";
 
-/**
- * Props for `Projects` slice in v4.
- */
 export type ProjectsProps = SliceComponentProps<Content.ProjectsSlice>;
 
-/**
- * V4 Component for "Projects" Slices using Prismic data.
- */
 const Projects: FC<ProjectsProps> = ({ slice }) => {
   const rawSectionId = slice.primary.section_id || "projects";
-  const sectionId = typeof rawSectionId === 'string' ? rawSectionId.replace(/^#+/, '') : rawSectionId;
+  const sectionId = typeof rawSectionId === "string" ? rawSectionId.replace(/^#+/, "") : rawSectionId;
   const projectList = slice.primary.projects;
 
   return (
     <section
       id={sectionId}
-      className="py-20 sm:py-32 px-4 sm:px-6 lg:px-8"
+      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8"
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
     >
@@ -33,19 +27,21 @@ const Projects: FC<ProjectsProps> = ({ slice }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-4"
+          className="mb-4"
         >
+          <div className="font-mono text-xs text-accent mb-2">
+            <span className="text-muted-foreground">{"// "}</span>projects
+          </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
             {slice.primary.heading}
           </h2>
           {isFilled.richText(slice.primary.decsription) && (
-            <div className="text-lg text-muted-foreground max-w-2xl mx-auto prose dark:prose-invert">
+            <div className="text-base text-muted-foreground max-w-2xl prose dark:prose-invert">
               <PrismicRichText field={slice.primary.decsription} />
             </div>
           )}
         </motion.div>
 
-        {/* 3D Carousel */}
         <ProjectCarousel projectList={projectList} />
       </div>
     </section>
