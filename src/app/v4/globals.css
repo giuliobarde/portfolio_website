@@ -4,50 +4,58 @@
 
 @layer base {
   :root {
-    /* Light mode colors - Apple-inspired */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 10%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    /* Terminal / Data Science theme - Light mode */
+    --background: 210 20% 98%;
+    --foreground: 220 20% 10%;
+    --muted: 210 15% 93%;
+    --muted-foreground: 215 15% 45%;
+    --card: 210 20% 96%;
+    --card-foreground: 220 20% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --primary: 0 0% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 10%;
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 98%;
+    --popover-foreground: 220 20% 10%;
+    --border: 215 15% 85%;
+    --input: 215 15% 85%;
+    --primary: 220 20% 10%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 210 15% 90%;
+    --secondary-foreground: 220 20% 10%;
+    --accent: 165 80% 40%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --ring: 0 0% 10%;
+    --ring: 165 80% 40%;
     --radius: 0.5rem;
+    --terminal: 165 80% 40%;
+    --terminal-dim: 165 60% 30%;
+    --cyan: 185 80% 50%;
+    --amber: 38 92% 50%;
   }
 
   .dark {
-    /* Dark mode colors - Apple-inspired */
-    --background: 0 0% 7%;
-    --foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 10%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 98%;
+    /* Terminal / Data Science theme - Dark mode */
+    --background: 220 25% 6%;
+    --foreground: 165 10% 90%;
+    --muted: 220 20% 12%;
+    --muted-foreground: 215 15% 55%;
+    --card: 220 25% 9%;
+    --card-foreground: 165 10% 90%;
+    --popover: 220 25% 9%;
+    --popover-foreground: 165 10% 90%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --primary: 165 10% 90%;
+    --primary-foreground: 220 25% 6%;
+    --secondary: 220 20% 14%;
+    --secondary-foreground: 165 10% 90%;
+    --accent: 165 80% 45%;
+    --accent-foreground: 220 25% 6%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --ring: 0 0% 83%;
+    --ring: 165 80% 45%;
+    --terminal: 165 80% 45%;
+    --terminal-dim: 165 60% 25%;
+    --cyan: 185 80% 55%;
+    --amber: 38 92% 55%;
   }
 }
 
@@ -61,17 +69,26 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
 
-  /* Apple-like typography */
+  /* Terminal-style typography */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    @apply font-bold tracking-tight;
+    font-family: var(--font-mono), 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   }
 
-  /* Remove scroll snap on mobile to avoid conflicts */
+  code, pre, .font-mono {
+    font-family: var(--font-mono), 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  /* Selection color */
+  ::selection {
+    background: hsl(var(--terminal) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
   @media (max-width: 768px) {
     html {
       scroll-snap-type: none;
@@ -80,24 +97,83 @@
 }
 
 @layer utilities {
-  /* Apple-style glass morphism */
-  .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  /* Terminal glass card */
+  .terminal-card {
+    @apply bg-card/80 backdrop-blur-md border border-border rounded-lg;
+    box-shadow:
+      0 0 0 1px hsl(var(--terminal) / 0.05),
+      0 4px 24px -4px rgba(0, 0, 0, 0.3);
   }
 
-  .glass-dark {
-    @apply bg-black/10 backdrop-blur-lg border border-black/20;
+  /* Glow effect */
+  .glow {
+    box-shadow:
+      0 0 20px hsl(var(--terminal) / 0.15),
+      0 0 60px hsl(var(--terminal) / 0.05);
   }
 
-  /* Apple-style text gradient */
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent to-primary;
+  .glow-text {
+    text-shadow: 0 0 20px hsl(var(--terminal) / 0.4);
   }
 
-  /* Apple-style shadow */
-  .shadow-apple {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                0 2px 4px -1px rgba(0, 0, 0, 0.06),
-                0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  /* Terminal prompt styling */
+  .terminal-prompt::before {
+    content: "$ ";
+    @apply text-accent font-mono;
+  }
+
+  /* Scanline effect */
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(var(--terminal) / 0.015) 2px,
+      hsl(var(--terminal) / 0.015) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Typing cursor animation */
+  @keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .cursor-blink {
+    animation: blink-cursor 1s step-end infinite;
+  }
+
+  /* Terminal text gradient */
+  .text-terminal-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--terminal)), hsl(var(--cyan)));
+  }
+
+  /* Matrix rain keyframes */
+  @keyframes matrix-fall {
+    0% { transform: translateY(-100%); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+  }
+
+  /* Pulse glow */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px hsl(var(--terminal) / 0.3); }
+    50% { box-shadow: 0 0 20px hsl(var(--terminal) / 0.6); }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  /* Grid dot pattern */
+  .dot-grid {
+    background-image: radial-gradient(circle, hsl(var(--terminal) / 0.15) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 }

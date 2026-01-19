@@ -1,4 +1,4 @@
-// V4 version slices - Using Prismic data with modern Apple-like design
+// V4 version slices - Terminal/Data Science theme with Prismic data
 
 import dynamic from "next/dynamic";
 
