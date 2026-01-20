@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Content,
   asLink,
@@ -46,6 +47,7 @@ const TechStackBadges: React.FC<{ field: RichTextField }> = ({ field }) => {
 const V4ProjectModal: React.FC<V4ProjectModalProps> = ({ project, onClose }) => {
   const [iframeError, setIframeError] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   const getWebsiteUrl = (): string | null => {
     if (!Array.isArray(project.project_link) || project.project_link.length === 0)
@@ -91,6 +93,10 @@ const V4ProjectModal: React.FC<V4ProjectModalProps> = ({ project, onClose }) => 
   };
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     setIframeError(false);
     setIframeLoading(true);
   }, [websiteUrl]);
@@ -112,15 +118,18 @@ const V4ProjectModal: React.FC<V4ProjectModalProps> = ({ project, onClose }) => 
     if ((e.target as HTMLElement).id === "v4-modal-overlay") onClose();
   };
 
-  return (
+  if (!mounted) return null;
+
+  const modalContent = (
     <motion.div
       id="v4-modal-overlay"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 p-4"
+      className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-[100] p-4"
       onClick={handleOverlayClick}
+      style={{ zIndex: 100 }}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -184,13 +193,19 @@ const V4ProjectModal: React.FC<V4ProjectModalProps> = ({ project, onClose }) => 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Left: Description + Links */}
               <div className="space-y-5">
-                {isFilled.richText(project.project_expanded_description) && (
+                {(isFilled.richText(project.project_expanded_description) || isFilled.richText(project.project_description)) && (
                   <div>
                     <h3 className="font-mono text-xs text-accent mb-2 uppercase tracking-wider">
                       # About
                     </h3>
                     <div className="text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert">
-                      <PrismicRichText field={project.project_expanded_description} />
+                      <PrismicRichText
+                        field={
+                          isFilled.richText(project.project_expanded_description)
+                            ? project.project_expanded_description
+                            : project.project_description
+                        }
+                      />
                     </div>
                   </div>
                 )}
@@ -314,6 +329,8 @@ const V4ProjectModal: React.FC<V4ProjectModalProps> = ({ project, onClose }) => 
       </motion.div>
     </motion.div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default V4ProjectModal;

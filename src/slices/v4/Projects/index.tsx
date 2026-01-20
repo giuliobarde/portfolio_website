@@ -27,7 +27,7 @@ const Projects: FC<ProjectsProps> = ({ slice }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-4"
+          className="mb-8 md:mb-12"
         >
           <div className="font-mono text-xs text-accent mb-2">
             <span className="text-muted-foreground">{"// "}</span>projects
