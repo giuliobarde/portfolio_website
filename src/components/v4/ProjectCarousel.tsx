@@ -416,7 +416,18 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ projectList = [] }) =
       </div>
 
       {/* Project Modal */}
-      {selectedProject && <V4ProjectModal project={selectedProject} onClose={closeModal} />}
+      {selectedProject && (
+        <V4ProjectModal
+          project={selectedProject}
+          projectList={projectList}
+          currentProjectIndex={projectList.indexOf(selectedProject)}
+          onClose={closeModal}
+          onNavigate={(index: number) => {
+            setSelectedProject(projectList[index]);
+            setCurrentIndex(index);
+          }}
+        />
+      )}
     </div>
   );
 };
