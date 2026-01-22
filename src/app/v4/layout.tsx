@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import V4LayoutWrapper from "@/components/v4/V4LayoutWrapper";
+import { createClient } from "@/prismicio";
 
 export const metadata: Metadata = {
   title: {
@@ -26,10 +27,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function V4Layout({
+export default async function V4Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <V4LayoutWrapper>{children}</V4LayoutWrapper>;
+  const client = createClient();
+  const page = await client.getSingle("homepage");
+
+  // Find the Hero slice to get the name
+  const heroSlice = page.data.slices.find(
+    (slice) => slice.slice_type === "hero"
+  );
+
+  const firstName = heroSlice?.primary?.first_name || "";
+  const lastName = heroSlice?.primary?.last_name || "";
+  const fullName = `${firstName} ${lastName}`.trim() || "Portfolio";
+
+  return <V4LayoutWrapper userName={fullName}>{children}</V4LayoutWrapper>;
 }

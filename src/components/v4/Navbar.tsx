@@ -6,15 +6,19 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
-  { name: "home", href: "#home" },
-  { name: "projects", href: "#projects" },
-  { name: "work", href: "#work" },
-  { name: "skills", href: "#skills" },
+  { name: "about me", href: "#about_me" },
   { name: "education", href: "#education" },
+  { name: "skills", href: "#skills" },
+  { name: "work", href: "#work" },
+  { name: "projects", href: "#projects" },
 ];
 
-export default function Navbar() {
-  const [activeSection, setActiveSection] = React.useState("home");
+interface NavbarProps {
+  userName?: string;
+}
+
+export default function Navbar({ userName = "Portfolio" }: NavbarProps) {
+  const [activeSection, setActiveSection] = React.useState("about_me");
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const { scrollY } = useScroll();
@@ -22,6 +26,38 @@ export default function Navbar() {
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
+
+  // Intersection Observer to detect active section
+  React.useEffect(() => {
+    const sectionIds = navItems.map((item) => item.href.slice(1));
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (sections.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the section that is most visible
+        const visibleEntries = entries.filter((entry) => entry.isIntersecting);
+        if (visibleEntries.length > 0) {
+          // Sort by intersection ratio to get the most visible section
+          const mostVisible = visibleEntries.reduce((prev, current) =>
+            current.intersectionRatio > prev.intersectionRatio ? current : prev
+          );
+          setActiveSection(mostVisible.target.id);
+        }
+      },
+      {
+        rootMargin: "-40% 0px -55% 0px",
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
+      }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
 
   // Close mobile menu on resize
   React.useEffect(() => {
@@ -70,14 +106,14 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Terminal-style logo */}
             <motion.a
-              href="#home"
-              onClick={(e) => handleClick(e, "#home")}
+              href="#about_me"
+              onClick={(e) => handleClick(e, "#about_me")}
               className="flex items-center gap-1.5 font-mono text-sm md:text-base"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <span className="text-accent">$</span>
-              <span className="text-foreground font-semibold">portfolio</span>
+              <span className="text-foreground font-semibold">{userName}</span>
               <span className="w-2 h-4 bg-accent/80 cursor-blink inline-block" />
             </motion.a>
 
@@ -96,7 +132,6 @@ export default function Navbar() {
                   )}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onHoverStart={() => setActiveSection(item.href.slice(1))}
                 >
                   {activeSection === item.href.slice(1) && (
                     <motion.div
@@ -155,10 +190,18 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ delay: index * 0.05 }}
-                  className="font-mono text-lg text-muted-foreground hover:text-accent transition-colors"
+                  className={cn(
+                    "font-mono text-lg transition-colors",
+                    activeSection === item.href.slice(1)
+                      ? "text-accent"
+                      : "text-muted-foreground hover:text-accent"
+                  )}
                 >
                   <span className="text-accent/60">$ cd </span>
                   {item.name}
+                  {activeSection === item.href.slice(1) && (
+                    <span className="ml-2 text-accent">←</span>
+                  )}
                 </motion.a>
               ))}
             </div>
