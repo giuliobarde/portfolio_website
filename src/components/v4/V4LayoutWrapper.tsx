@@ -20,10 +20,8 @@ const inter = Inter({
 
 export default function V4LayoutWrapper({
   children,
-  userName,
 }: {
   children: React.ReactNode;
-  userName?: string;
 }) {
   return (
     <div
@@ -38,7 +36,7 @@ export default function V4LayoutWrapper({
         enableSystem
         disableTransitionOnChange={false}
       >
-        <Navbar userName={userName} />
+        <Navbar />
         <main className="relative">{children}</main>
 
         {/* Terminal-style footer */}
