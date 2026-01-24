@@ -3,6 +3,7 @@
 import { JetBrains_Mono, Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/v4/ThemeProvider";
 import Navbar from "@/components/v4/Navbar";
+import BackgroundEffects from "@/components/v4/BackgroundEffects";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -36,6 +37,7 @@ export default function V4LayoutWrapper({
         enableSystem
         disableTransitionOnChange={false}
       >
+        <BackgroundEffects />
         <Navbar />
         <main className="relative">{children}</main>
 

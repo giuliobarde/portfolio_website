@@ -18,7 +18,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ userName = "Portfolio" }: NavbarProps) {
-  const [activeSection, setActiveSection] = React.useState("about_me");
+  const [activeSection, setActiveSection] = React.useState("#home");
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const { scrollY } = useScroll();
@@ -26,38 +26,6 @@ export default function Navbar({ userName = "Portfolio" }: NavbarProps) {
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
-
-  // Intersection Observer to detect active section
-  React.useEffect(() => {
-    const sectionIds = navItems.map((item) => item.href.slice(1));
-    const sections = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
-
-    if (sections.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find the section that is most visible
-        const visibleEntries = entries.filter((entry) => entry.isIntersecting);
-        if (visibleEntries.length > 0) {
-          // Sort by intersection ratio to get the most visible section
-          const mostVisible = visibleEntries.reduce((prev, current) =>
-            current.intersectionRatio > prev.intersectionRatio ? current : prev
-          );
-          setActiveSection(mostVisible.target.id);
-        }
-      },
-      {
-        rootMargin: "-40% 0px -55% 0px",
-        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
-      }
-    );
-
-    sections.forEach((section) => observer.observe(section));
-
-    return () => observer.disconnect();
-  }, []);
 
   // Close mobile menu on resize
   React.useEffect(() => {
@@ -106,8 +74,8 @@ export default function Navbar({ userName = "Portfolio" }: NavbarProps) {
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Terminal-style logo */}
             <motion.a
-              href="#about_me"
-              onClick={(e) => handleClick(e, "#about_me")}
+              href="#home"
+              onClick={(e) => handleClick(e, "#home")}
               className="flex items-center gap-1.5 font-mono text-sm md:text-base"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

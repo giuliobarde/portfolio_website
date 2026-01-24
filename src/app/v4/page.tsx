@@ -4,7 +4,6 @@ import { SliceZone } from "@prismicio/react";
 
 import { createClient } from "@/prismicio";
 import { components } from "@/slices/v4";
-import BackgroundEffects from "@/components/v4/BackgroundEffects";
 
 export default async function V4Page() {
   const client = createClient();
@@ -12,9 +11,6 @@ export default async function V4Page() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Animated Background */}
-      <BackgroundEffects />
-
       {/* Main Content from Prismic */}
       <div className="relative z-10">
         <SliceZone slices={page.data.slices} components={components} />
