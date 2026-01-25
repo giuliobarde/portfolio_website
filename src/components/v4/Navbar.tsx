@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
-  { name: "about me", href: "#about_me" },
+  { name: "about me", href: "#home" },
   { name: "education", href: "#education" },
   { name: "skills", href: "#skills" },
   { name: "work", href: "#work" },
@@ -18,7 +18,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ userName = "Portfolio" }: NavbarProps) {
-  const [activeSection, setActiveSection] = React.useState("#home");
+  const [activeSection, setActiveSection] = React.useState("home");
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const { scrollY } = useScroll();
@@ -26,6 +26,60 @@ export default function Navbar({ userName = "Portfolio" }: NavbarProps) {
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
+
+  // Track active section based on scroll position
+  React.useEffect(() => {
+    const sections = navItems.map((item) => item.href.slice(1)); // Remove the #
+    const observerOptions = {
+      root: null,
+      rootMargin: "-20% 0px -70% 0px", // Trigger when section is in upper portion of viewport
+      threshold: 0,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          if (sections.includes(sectionId)) {
+            setActiveSection(sectionId);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observe all sections
+    sections.forEach((sectionId) => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    // Also check on initial load
+    const checkInitialSection = () => {
+      const scrollPosition = window.scrollY + 100; // Offset for navbar
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const element = document.getElementById(sections[i]);
+        if (element) {
+          const elementTop = element.offsetTop;
+          if (scrollPosition >= elementTop) {
+            setActiveSection(sections[i]);
+            break;
+          }
+        }
+      }
+    };
+
+    // Check initial section after a short delay to ensure DOM is ready
+    const timeoutId = setTimeout(checkInitialSection, 100);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   // Close mobile menu on resize
   React.useEffect(() => {
