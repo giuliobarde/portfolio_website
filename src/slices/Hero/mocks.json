@@ -1,0 +1,29 @@
+[
+	{
+		"__TYPE__": "SharedSliceContent",
+		"variation": "default",
+		"primary": {
+			"section_id": {
+				"__TYPE__": "FieldContent",
+				"value": "hero",
+				"type": "Text"
+			},
+			"first_name": {
+				"__TYPE__": "FieldContent",
+				"value": "produce",
+				"type": "Text"
+			},
+			"last_name": {
+				"__TYPE__": "FieldContent",
+				"value": "eleven",
+				"type": "Text"
+			},
+			"tag_line": {
+				"__TYPE__": "FieldContent",
+				"value": "basket",
+				"type": "Text"
+			}
+		},
+		"items": []
+	}
+]

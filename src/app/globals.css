@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Monospace font variable */
+  :root {
+    --font-mono: var(--font-mono);
+  }
+  
+  /* CS-themed code elements */
+  code, pre, .mono, .code-style {
+    font-family: var(--font-mono), 'Courier New', monospace;
+  }
+  
+  /* Improve focus visibility */
+  *:focus-visible {
+    outline: 2px solid theme('colors.yellow.400');
+    outline-offset: 2px;
+  }
+  
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar for modal */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: theme('colors.slate.800');
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: theme('colors.slate.600');
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.yellow.400');
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Word Cloud Styles */
+.tagcloud {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.tagcloud span {
+  display: inline-block;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.tagcloud-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  user-select: none;
+}
+
+.tagcloud-item:hover {
+  z-index: 10;
+  position: relative;
+}
+
+/* Smooth entrance animation for word cloud */
+@keyframes wordCloudFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tagcloud span {
+  animation: wordCloudFadeIn 0.6s ease-out backwards;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .tagcloud span {
+    animation: none;
+  }
+  
+  .tagcloud-item {
+    transition: none !important;
+  }
+}
+
+/* CS-Themed Styles */
+@layer utilities {
+  /* Code-like brackets and syntax */
+  .code-bracket {
+    color: theme('colors.yellow.400');
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+  
+  .code-string {
+    color: theme('colors.yellow.300');
+    font-family: var(--font-mono);
+  }
+  
+  .code-keyword {
+    color: theme('colors.yellow.500');
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+  
+  .code-comment {
+    color: theme('colors.slate.500');
+    font-family: var(--font-mono);
+    font-style: italic;
+  }
+  
+  /* Terminal prompt style */
+  .terminal-prompt {
+    color: theme('colors.yellow.400');
+    font-family: var(--font-mono);
+  }
+  
+  .terminal-prompt::before {
+    content: '$ ';
+    color: theme('colors.yellow.500');
+    font-weight: bold;
+  }
+  
+  /* Subtle code block styling */
+  .code-block {
+    background: theme('colors.slate.800');
+    border-left: 3px solid theme('colors.yellow.400');
+    border-radius: 4px;
+    padding: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  
+  /* CS-themed separator */
+  .cs-separator {
+    color: theme('colors.slate.600');
+    font-family: var(--font-mono);
+    font-weight: 300;
+    user-select: none;
+  }
+  
+  /* Subtle terminal glow */
+  .terminal-glow {
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+  }
+  
+  /* Typing cursor animation */
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: theme('colors.yellow.400');
+    margin-left: 2px;
+    animation: blink 1s infinite;
+    vertical-align: baseline;
+  }
+  
+  /* CS-themed link hover effect */
+  .cs-link {
+    position: relative;
+    transition: color 0.2s ease;
+  }
+  
+  .cs-link:hover {
+    color: theme('colors.yellow.400');
+  }
+  
+  .cs-link::after {
+    content: '()';
+    color: theme('colors.slate.600');
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    margin-left: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  .cs-link:hover::after {
+    opacity: 1;
+  }
+}

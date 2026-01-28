@@ -1,0 +1,48 @@
+[
+	{
+		"__TYPE__": "SharedSliceContent",
+		"variation": "default",
+		"primary": {
+			"heading": {
+				"__TYPE__": "FieldContent",
+				"value": "best",
+				"type": "Text"
+			},
+			"tech_description": {
+				"__TYPE__": "StructuredTextContent",
+				"value": [
+					{
+						"type": "paragraph",
+						"content": {
+							"text": "Deserunt cillum aute amet dolor culpa dolore magna aute ullamco sint ipsum officia ipsum aute. Exercitation laboris adipisicing excepteur aute adipisicing anim est culpa anim voluptate quis est. Sint officia deserunt enim dolore Lorem velit."
+						}
+					}
+				]
+			},
+			"tech_skill": {
+				"__TYPE__": "GroupContentType",
+				"value": [
+					{
+						"__TYPE__": "GroupItemContent",
+						"value": [
+							[
+								"skill",
+								{
+									"__TYPE__": "FieldContent",
+									"value": "facing",
+									"type": "Text"
+								}
+							]
+						]
+					}
+				]
+			},
+			"section_id": {
+				"__TYPE__": "FieldContent",
+				"value": "could",
+				"type": "Text"
+			}
+		},
+		"items": []
+	}
+]

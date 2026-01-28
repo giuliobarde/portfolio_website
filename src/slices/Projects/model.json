@@ -1,0 +1,118 @@
+{
+  "id": "projects",
+  "type": "SharedSlice",
+  "name": "Projects",
+  "description": "Projects",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": "",
+      "primary": {
+        "section_id": {
+          "type": "Text",
+          "config": {
+            "label": "Section ID",
+            "placeholder": ""
+          }
+        },
+        "heading": {
+          "type": "Text",
+          "config": {
+            "label": "Heading",
+            "placeholder": ""
+          }
+        },
+        "decsription": {
+          "type": "StructuredText",
+          "config": {
+            "label": "Decsription",
+            "placeholder": "",
+            "allowTargetBlank": true,
+            "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+          }
+        },
+        "projects": {
+          "type": "Group",
+          "config": {
+            "label": "Projects",
+            "repeat": true,
+            "fields": {
+              "project_name": {
+                "type": "Text",
+                "config": {
+                  "label": "Project Name",
+                  "placeholder": ""
+                }
+              },
+              "project_date": {
+                "type": "Date",
+                "config": {
+                  "label": "Project Start Date",
+                  "placeholder": ""
+                }
+              },
+              "project_end_date": {
+                "type": "Date",
+                "config": {
+                  "label": "Project End Date",
+                  "placeholder": ""
+                }
+              },
+              "project_description": {
+                "type": "StructuredText",
+                "config": {
+                  "label": "Project Description",
+                  "placeholder": "",
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+                }
+              },
+              "project_expanded_description": {
+                "type": "StructuredText",
+                "config": {
+                  "label": "Project Expanded Description",
+                  "placeholder": "",
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+                }
+              },
+              "tech_stack": {
+                "type": "StructuredText",
+                "config": {
+                  "label": "Tech Stack",
+                  "placeholder": "",
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+                }
+              },
+              "project_image": {
+                "type": "Image",
+                "config": {
+                  "label": "Project Image",
+                  "constraint": {},
+                  "thumbnails": []
+                }
+              },
+              "project_link": {
+                "type": "Link",
+                "config": {
+                  "label": "Project Link",
+                  "placeholder": "",
+                  "select": null,
+                  "allowTargetBlank": true,
+                  "allowText": true,
+                  "repeat": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "items": {}
+    }
+  ]
+}

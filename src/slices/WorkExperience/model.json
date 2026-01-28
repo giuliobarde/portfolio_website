@@ -1,0 +1,16 @@
+{
+  "id": "work_experience",
+  "type": "SharedSlice",
+  "name": "WorkExperience",
+  "description": "WorkExperience",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": ""
+    }
+  ]
+}
