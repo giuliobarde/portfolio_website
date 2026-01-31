@@ -22,6 +22,12 @@
             },
             "hero": {
               "type": "SharedSlice"
+            },
+            "education": {
+              "type": "SharedSlice"
+            },
+            "work_experience": {
+              "type": "SharedSlice"
             }
           }
         }
