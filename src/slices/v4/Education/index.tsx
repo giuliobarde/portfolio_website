@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Content, isFilled, DateField, RichTextField, KeyTextField } from "@prismicio/client";
-import { PrismicRichText, SliceComponentProps } from "@prismicio/react";
+import { isFilled, DateField, RichTextField, KeyTextField } from "@prismicio/client";
+import { PrismicRichText } from "@prismicio/react";
 import { motion } from "framer-motion";
 
 // Type definition matching Prismic structure from the image
@@ -151,12 +151,8 @@ const Education: React.FC<EducationProps> = ({ slice }) => {
                     <div className="font-mono text-[10px] text-accent/60 mb-2">
                       # relevant coursework
                     </div>
-                    {isFilled.richText(edu.coursework) ? (
-                      // If coursework is rich text, render it as rich text
-                      <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-li:text-muted-foreground">
-                        <PrismicRichText field={edu.coursework as RichTextField} />
-                      </div>
-                    ) : isFilled.keyText(edu.coursework) ? (
+                    {/* Check if coursework is a string (KeyTextField) or rich text */}
+                    {typeof edu.coursework === "string" ? (
                       // If coursework is plain text, split by comma and display as badges
                       <div className="flex flex-wrap gap-1.5">
                         {edu.coursework.split(",").map((course, i) => (
@@ -168,7 +164,12 @@ const Education: React.FC<EducationProps> = ({ slice }) => {
                           </span>
                         ))}
                       </div>
-                    ) : null}
+                    ) : (
+                      // If coursework is rich text, render it as rich text
+                      <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-li:text-muted-foreground">
+                        <PrismicRichText field={edu.coursework as RichTextField} />
+                      </div>
+                    )}
                   </div>
                 )}
 
