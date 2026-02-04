@@ -176,4 +176,16 @@
     background-image: radial-gradient(circle, hsl(var(--terminal) / 0.15) 1px, transparent 1px);
     background-size: 24px 24px;
   }
+
+  /* Timeline dot active state */
+  .timeline-dot-active {
+    border-color: hsl(var(--accent)) !important;
+    background-color: hsl(var(--accent)) !important;
+    box-shadow: 0 0 12px hsl(var(--terminal) / 0.4);
+  }
+
+  /* Timeline progress line glow */
+  .timeline-line-glow {
+    box-shadow: 0 0 8px hsl(var(--terminal) / 0.3);
+  }
 }

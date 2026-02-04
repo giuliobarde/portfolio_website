@@ -5,6 +5,8 @@ import { Content, isFilled } from "@prismicio/client";
 import { PrismicRichText, SliceComponentProps } from "@prismicio/react";
 import { motion } from "framer-motion";
 import ProjectCarousel from "@/components/v4/ProjectCarousel";
+import { sectionHeaderVariants } from "@/lib/animations";
+import SectionDivider from "@/components/v4/SectionDivider";
 
 export type ProjectsProps = SliceComponentProps<Content.ProjectsSlice>;
 
@@ -14,6 +16,8 @@ const Projects: FC<ProjectsProps> = ({ slice }) => {
   const projectList = slice.primary.projects;
 
   return (
+    <>
+    <SectionDivider />
     <section
       id={sectionId}
       className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8"
@@ -23,10 +27,10 @@ const Projects: FC<ProjectsProps> = ({ slice }) => {
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          variants={sectionHeaderVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
           className="mb-8 md:mb-12"
         >
           <div className="font-mono text-xs text-accent mb-2">
@@ -45,6 +49,7 @@ const Projects: FC<ProjectsProps> = ({ slice }) => {
         <ProjectCarousel projectList={projectList} />
       </div>
     </section>
+    </>
   );
 };
 

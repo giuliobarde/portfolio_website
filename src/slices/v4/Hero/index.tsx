@@ -53,10 +53,10 @@ const Hero: FC<HeroProps> = ({ slice }) => {
       <div className="max-w-4xl mx-auto w-full">
         {/* Terminal window */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="terminal-card overflow-hidden"
+          initial={{ opacity: 0, scaleY: 0.6, y: 30 }}
+          animate={{ opacity: 1, scaleY: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="terminal-card overflow-hidden origin-center"
         >
           {/* Terminal title bar */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/50">

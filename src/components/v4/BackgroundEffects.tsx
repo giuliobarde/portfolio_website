@@ -22,7 +22,19 @@ interface Orb {
   vx: number;
   vy: number;
   opacity: number;
+  phase: number; // unique phase for pulsing
 }
+
+interface CodeChar {
+  x: number;
+  y: number;
+  vy: number;
+  char: string;
+  opacity: number;
+  fontSize: number;
+}
+
+const CODE_CHARS = ["{", "}", "0", "1", "/", ">", "$", "_", ";", "(", ")", "<", "="];
 
 export default function BackgroundEffects() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,20 +54,24 @@ export default function BackgroundEffects() {
 
   useEffect(() => {
     if (!mounted) return;
-    
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
-    
+
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
     let animationId: number;
     let particles: Particle[] = [];
     let orbs: Orb[] = [];
+    let codeChars: CodeChar[] = [];
     let time = 0;
+    let lastFrameTime = 0;
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
     const width = () => window.innerWidth;
     const height = () => window.innerHeight;
@@ -64,23 +80,35 @@ export default function BackgroundEffects() {
       const w = width();
       const h = height();
       const dpr = window.devicePixelRatio || 1;
-      
+
       canvas.width = w * dpr;
       canvas.height = h * dpr;
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
-      
-      // Reset transform and scale
+
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
+    };
+
+    const initCodeChars = () => {
+      const w = width();
+      const h = height();
+      const count = 22;
+      codeChars = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vy: -(Math.random() * 0.2 + 0.1), // slow upward drift
+        char: CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)],
+        opacity: Math.random() * 0.05 + 0.03, // extremely subtle
+        fontSize: Math.random() * 4 + 10, // 10-14px
+      }));
     };
 
     const initParticles = () => {
       const w = width();
       const h = height();
-      
+
       if (isDark) {
-        // Dark mode: Floating orbs with subtle glow
         const count = 15;
         orbs = Array.from({ length: count }, () => ({
           x: Math.random() * w,
@@ -89,10 +117,10 @@ export default function BackgroundEffects() {
           vx: (Math.random() - 0.5) * 0.3,
           vy: (Math.random() - 0.5) * 0.3,
           opacity: Math.random() * 0.25 + 0.1,
+          phase: Math.random() * Math.PI * 2, // unique pulse phase
         }));
         particles = [];
       } else {
-        // Light mode: Small geometric particles
         const count = Math.min(Math.floor((w * h) / 15000), 80);
         particles = Array.from({ length: count }, () => ({
           x: Math.random() * w,
@@ -106,6 +134,32 @@ export default function BackgroundEffects() {
         }));
         orbs = [];
       }
+
+      initCodeChars();
+    };
+
+    const drawCodeChars = () => {
+      const w = width();
+      const h = height();
+      const color = isDark ? "147, 197, 253" : "59, 130, 246";
+
+      codeChars.forEach((c) => {
+        ctx.save();
+        ctx.font = `${c.fontSize}px monospace`;
+        ctx.fillStyle = `rgba(${color}, ${c.opacity})`;
+        ctx.fillText(c.char, c.x, c.y);
+        ctx.restore();
+
+        // Update position
+        c.y += c.vy;
+
+        // Respawn at bottom when exiting top
+        if (c.y < -20) {
+          c.y = h + 20;
+          c.x = Math.random() * w;
+          c.char = CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
+        }
+      });
     };
 
     const drawDarkMode = () => {
@@ -113,19 +167,19 @@ export default function BackgroundEffects() {
       const h = height();
       ctx.clearRect(0, 0, w, h);
 
-      // Draw floating orbs with glow
+      // Draw floating orbs with pulsing glow
       orbs.forEach((orb) => {
+        // Sinusoidal opacity pulse
+        const pulseOpacity = orb.opacity + Math.sin(time * 0.02 + orb.phase) * 0.05;
+        const clampedOpacity = Math.max(0.05, Math.min(pulseOpacity, 0.35));
+
         // Outer glow
         const gradient = ctx.createRadialGradient(
-          orb.x,
-          orb.y,
-          0,
-          orb.x,
-          orb.y,
-          orb.radius * 2
+          orb.x, orb.y, 0,
+          orb.x, orb.y, orb.radius * 2
         );
-        gradient.addColorStop(0, `rgba(96, 165, 250, ${orb.opacity})`);
-        gradient.addColorStop(0.5, `rgba(96, 165, 250, ${orb.opacity * 0.6})`);
+        gradient.addColorStop(0, `rgba(96, 165, 250, ${clampedOpacity})`);
+        gradient.addColorStop(0.5, `rgba(96, 165, 250, ${clampedOpacity * 0.6})`);
         gradient.addColorStop(1, `rgba(96, 165, 250, 0)`);
 
         ctx.beginPath();
@@ -136,7 +190,7 @@ export default function BackgroundEffects() {
         // Core orb
         ctx.beginPath();
         ctx.arc(orb.x, orb.y, orb.radius * 0.4, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(147, 197, 253, ${Math.min(orb.opacity * 3, 0.8)})`;
+        ctx.fillStyle = `rgba(147, 197, 253, ${Math.min(clampedOpacity * 3, 0.8)})`;
         ctx.fill();
 
         // Update position
@@ -150,7 +204,7 @@ export default function BackgroundEffects() {
         if (orb.y > h + orb.radius) orb.vy = -Math.abs(orb.vy);
       });
 
-      // Draw connecting lines between nearby orbs
+      // Draw connecting lines with enhanced styling
       for (let i = 0; i < orbs.length; i++) {
         for (let j = i + 1; j < orbs.length; j++) {
           const dx = orbs[i].x - orbs[j].x;
@@ -159,15 +213,29 @@ export default function BackgroundEffects() {
 
           if (dist < 350) {
             const opacity = (1 - dist / 350) * 0.15;
+            const lineWidth = 1 + (1 - dist / 350) * 0.5;
+
+            // Connecting line
             ctx.beginPath();
             ctx.strokeStyle = `rgba(147, 197, 253, ${opacity})`;
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = lineWidth;
             ctx.moveTo(orbs[i].x, orbs[i].y);
             ctx.lineTo(orbs[j].x, orbs[j].y);
             ctx.stroke();
+
+            // Midpoint glow dot
+            const mx = (orbs[i].x + orbs[j].x) / 2;
+            const my = (orbs[i].y + orbs[j].y) / 2;
+            ctx.beginPath();
+            ctx.arc(mx, my, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(147, 197, 253, ${opacity * 1.5})`;
+            ctx.fill();
           }
         }
       }
+
+      // Draw floating code characters
+      drawCodeChars();
     };
 
     const drawLightMode = () => {
@@ -175,24 +243,21 @@ export default function BackgroundEffects() {
       const h = height();
       ctx.clearRect(0, 0, w, h);
 
-      // Draw geometric shapes (triangles and circles)
+      // Draw geometric shapes
       particles.forEach((p) => {
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.angle);
         ctx.globalAlpha = p.opacity;
 
-        // Alternate between circles and triangles
         const shapeType = Math.floor(p.x + p.y) % 2;
 
         if (shapeType === 0) {
-          // Draw circle
           ctx.beginPath();
           ctx.arc(0, 0, p.size, 0, Math.PI * 2);
           ctx.fillStyle = "rgba(59, 130, 246, 0.6)";
           ctx.fill();
         } else {
-          // Draw triangle
           ctx.beginPath();
           ctx.moveTo(0, -p.size);
           ctx.lineTo(-p.size * 0.866, p.size * 0.5);
@@ -204,12 +269,10 @@ export default function BackgroundEffects() {
 
         ctx.restore();
 
-        // Update position and rotation
         p.x += p.vx;
         p.y += p.vy;
         p.angle += p.rotationSpeed;
 
-        // Wrap around edges
         if (p.x < -p.size) p.x = w + p.size;
         if (p.x > w + p.size) p.x = -p.size;
         if (p.y < -p.size) p.y = h + p.size;
@@ -234,21 +297,30 @@ export default function BackgroundEffects() {
         }
         ctx.stroke();
       }
+
+      // Draw floating code characters
+      drawCodeChars();
     };
 
-    const draw = () => {
+    const draw = (currentTime: number) => {
+      animationId = requestAnimationFrame(draw);
+
+      // 30fps frame cap
+      const delta = currentTime - lastFrameTime;
+      if (delta < FRAME_INTERVAL) return;
+      lastFrameTime = currentTime - (delta % FRAME_INTERVAL);
+
       time += 0.5;
       if (isDark) {
         drawDarkMode();
       } else {
         drawLightMode();
       }
-      animationId = requestAnimationFrame(draw);
     };
 
     resize();
     initParticles();
-    draw();
+    animationId = requestAnimationFrame(draw);
 
     const handleResize = () => {
       resize();
@@ -300,10 +372,11 @@ export default function BackgroundEffects() {
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
-        style={{ 
+        style={{
           mixBlendMode: isDark ? "screen" : "normal",
           opacity: isDark ? 1 : 0.9,
-          zIndex: 1
+          zIndex: 1,
+          willChange: "transform",
         }}
       />
 

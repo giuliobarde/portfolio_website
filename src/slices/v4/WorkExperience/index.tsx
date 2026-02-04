@@ -5,6 +5,8 @@ import type { RichTextField } from "@prismicio/client";
 import { PrismicRichText } from "@prismicio/react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { sectionHeaderVariants, cardVariants, TERMINAL_EASE } from "@/lib/animations";
+import SectionDivider from "@/components/v4/SectionDivider";
 
 type WorkExperienceSlice = {
   slice_type: string;
@@ -46,6 +48,8 @@ const WorkExperience: React.FC<WorkExperienceProps> = ({ slice }) => {
   };
 
   return (
+    <>
+    <SectionDivider />
     <section
       id={sectionId}
       className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8"
@@ -55,10 +59,10 @@ const WorkExperience: React.FC<WorkExperienceProps> = ({ slice }) => {
       <div className="max-w-4xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          variants={sectionHeaderVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
           className="mb-12"
         >
           <div className="font-mono text-xs text-accent mb-2">
@@ -76,21 +80,33 @@ const WorkExperience: React.FC<WorkExperienceProps> = ({ slice }) => {
 
         {/* Git-log style timeline */}
         <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-[19px] top-2 bottom-2 w-px bg-border/50" />
+          {/* Vertical line — animates scaleY */}
+          <motion.div
+            className="absolute left-[19px] top-2 bottom-2 w-px bg-border/50 origin-top"
+            initial={{ scaleY: 0 }}
+            whileInView={{ scaleY: 1 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 1.2, ease: TERMINAL_EASE }}
+          />
 
           <div className="space-y-8">
             {experiences.map((exp, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-60px" }}
                 className="relative pl-12"
               >
-                {/* Git commit dot */}
-                <div className="absolute left-[14px] top-[10px] w-[11px] h-[11px] rounded-full border-2 border-accent bg-background z-10" />
+                {/* Git commit dot — spring pop */}
+                <motion.div
+                  className="absolute left-[14px] top-[10px] w-[11px] h-[11px] rounded-full border-2 border-accent bg-background z-10"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15, delay: index * 0.1 }}
+                />
 
                 {/* Experience card */}
                 <div className={cn(
@@ -180,6 +196,7 @@ const WorkExperience: React.FC<WorkExperienceProps> = ({ slice }) => {
         </div>
       </div>
     </section>
+    </>
   );
 };
 

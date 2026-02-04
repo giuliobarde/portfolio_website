@@ -4,6 +4,8 @@ import React from "react";
 import { Content, isFilled } from "@prismicio/client";
 import { PrismicRichText } from "@prismicio/react";
 import { motion } from "framer-motion";
+import { sectionHeaderVariants, cardVariants, staggerContainerVariants, listItemVariants } from "@/lib/animations";
+import SectionDivider from "@/components/v4/SectionDivider";
 
 export type TechListProps = {
   slice: Content.TechListSlice;
@@ -78,6 +80,8 @@ const TechList: React.FC<TechListProps> = ({ slice }) => {
   const categorized = categorizeSkills(wordList);
 
   return (
+    <>
+    <SectionDivider />
     <section
       id={sectionId}
       className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8"
@@ -87,10 +91,10 @@ const TechList: React.FC<TechListProps> = ({ slice }) => {
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          variants={sectionHeaderVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
           className="mb-12"
         >
           <div className="font-mono text-xs text-accent mb-2">
@@ -107,14 +111,17 @@ const TechList: React.FC<TechListProps> = ({ slice }) => {
         </motion.div>
 
         {/* Categorized Skills Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {Object.entries(categorized).map(([category, skills], catIndex) => (
+        <motion.div
+          variants={staggerContainerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          {Object.entries(categorized).map(([category, skills]) => (
             <motion.div
               key={category}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: catIndex * 0.1 }}
+              variants={cardVariants}
               className="terminal-card overflow-hidden"
             >
               {/* Category header */}
@@ -133,14 +140,17 @@ const TechList: React.FC<TechListProps> = ({ slice }) => {
                 <h3 className="font-mono text-sm font-semibold text-accent mb-3">
                   {category}
                 </h3>
-                <div className="space-y-2">
+                <motion.div
+                  variants={staggerContainerVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  className="space-y-2"
+                >
                   {skills.map((skill, index) => (
                     <motion.div
                       key={index}
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.2, delay: catIndex * 0.1 + index * 0.03 }}
+                      variants={listItemVariants}
                       className="group flex items-center gap-3"
                     >
                       <span className="font-mono text-[10px] text-accent/50 w-4 text-right shrink-0">
@@ -155,14 +165,14 @@ const TechList: React.FC<TechListProps> = ({ slice }) => {
                       </div>
                     </motion.div>
                   ))}
-                </div>
+                </motion.div>
                 <div className="mt-3 pt-2 border-t border-border/30 font-mono text-[10px] text-muted-foreground">
                   {skills.length} {skills.length === 1 ? "item" : "items"}
                 </div>
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Total count */}
         <motion.div
@@ -177,6 +187,7 @@ const TechList: React.FC<TechListProps> = ({ slice }) => {
         </motion.div>
       </div>
     </section>
+    </>
   );
 };
 
