@@ -188,4 +188,29 @@
   .timeline-line-glow {
     box-shadow: 0 0 8px hsl(var(--terminal) / 0.3);
   }
+
+  /* Horizontal timeline track (dim background line) */
+  .h-timeline-track {
+    @apply absolute h-px w-full bg-border/30;
+  }
+
+  /* Horizontal timeline progress line (GSAP animates scaleX) */
+  .h-timeline-progress {
+    @apply absolute h-px w-full bg-accent;
+    transform-origin: left center;
+    transform: scaleX(0);
+    box-shadow: 0 0 8px hsl(var(--terminal) / 0.3);
+  }
+
+  /* Scroll progress indicator */
+  .scroll-progress-bar {
+    @apply h-0.5 bg-border/20 rounded-full overflow-hidden;
+  }
+
+  .scroll-progress-fill {
+    @apply h-full bg-accent rounded-full;
+    transform-origin: left center;
+    transform: scaleX(0);
+    box-shadow: 0 0 6px hsl(var(--terminal) / 0.3);
+  }
 }
