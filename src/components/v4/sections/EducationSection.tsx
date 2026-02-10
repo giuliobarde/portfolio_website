@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -32,6 +32,16 @@ export interface EducationSectionProps {
   items: EducationItem[];
 }
 
+/* ------------------------------------------------------------------ */
+/*  Date helpers                                                       */
+/* ------------------------------------------------------------------ */
+
+function parseDateTs(date: string | undefined): number | null {
+  if (!date) return null;
+  const d = new Date(date);
+  return isNaN(d.getTime()) ? null : d.getTime();
+}
+
 function formatDate(date: string | undefined): string {
   if (!date) return "";
   return new Date(date)
@@ -46,78 +56,188 @@ function formatDuration(start?: string, end?: string): string {
   return `${s} — ${e}`;
 }
 
+/* ------------------------------------------------------------------ */
+/*  Timeline range & marker helpers                                    */
+/* ------------------------------------------------------------------ */
+
+interface TimelineRange {
+  start: number;
+  end: number;
+}
+
+function getTimelineRange(items: EducationItem[]): TimelineRange {
+  let minDate = Infinity;
+  let maxDate = -Infinity;
+  for (const item of items) {
+    const s = parseDateTs(item.start_date);
+    const e = item.end_date ? parseDateTs(item.end_date) : Date.now();
+    if (s !== null) minDate = Math.min(minDate, s);
+    if (e !== null) maxDate = Math.max(maxDate, e);
+  }
+  if (minDate === Infinity) minDate = Date.now() - 5 * 365.25 * 86400000;
+  if (maxDate === -Infinity) maxDate = Date.now();
+
+  const sd = new Date(minDate);
+  const ed = new Date(maxDate);
+  const paddedStart = new Date(sd.getFullYear(), sd.getMonth() - 1, 1).getTime();
+  const paddedEnd = new Date(ed.getFullYear(), ed.getMonth() + 4, 1).getTime();
+  return { start: paddedStart, end: paddedEnd };
+}
+
+function dateToPercent(ts: number, range: TimelineRange): number {
+  if (range.end === range.start) return 50;
+  return ((ts - range.start) / (range.end - range.start)) * 100;
+}
+
+interface YearMarker {
+  year: number;
+  percent: number;
+}
+interface MonthMarker {
+  percent: number;
+  month: number;
+}
+
+function generateTimeMarkers(range: TimelineRange) {
+  const startDate = new Date(range.start);
+  const endDate = new Date(range.end);
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+
+  const years: YearMarker[] = [];
+  const months: MonthMarker[] = [];
+
+  for (let y = startYear; y <= endYear + 1; y++) {
+    for (let m = 0; m < 12; m++) {
+      const ts = new Date(y, m, 1).getTime();
+      if (ts < range.start || ts > range.end) continue;
+      const pct = dateToPercent(ts, range);
+      if (m === 0) {
+        years.push({ year: y, percent: pct });
+      } else {
+        months.push({ percent: pct, month: m });
+      }
+    }
+  }
+  return { years, months };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
+
 export default function EducationSection({
   sectionId = "education",
   heading,
   description,
   items,
 }: EducationSectionProps) {
-  // Debug: log items received
-  console.log("[EducationSection] items received:", items.length, items);
-
   const sectionRef = useRef<HTMLElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
-  const timelineTrackRef = useRef<HTMLDivElement>(null);
-  const timelineProgressRef = useRef<HTMLDivElement>(null);
+  const timelineContentRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const yearRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const durationLabelRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const connectorRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const segmentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollHintRef = useRef<HTMLDivElement>(null);
 
   const [isMobile, setIsMobile] = useState(false);
 
-  const setCardRef = useCallback(
-    (el: HTMLDivElement | null, index: number) => {
-      cardRefs.current[index] = el;
+  const setCardRef = useCallback((el: HTMLDivElement | null, i: number) => {
+    cardRefs.current[i] = el;
+  }, []);
+  const setDotRef = useCallback((el: HTMLDivElement | null, i: number) => {
+    dotRefs.current[i] = el;
+  }, []);
+  const setDurationLabelRef = useCallback(
+    (el: HTMLSpanElement | null, i: number) => {
+      durationLabelRefs.current[i] = el;
     },
     []
   );
-
-  const setDotRef = useCallback(
-    (el: HTMLDivElement | null, index: number) => {
-      dotRefs.current[index] = el;
-    },
-    []
-  );
-
-  const setYearRef = useCallback(
-    (el: HTMLSpanElement | null, index: number) => {
-      yearRefs.current[index] = el;
-    },
-    []
-  );
-
   const setConnectorRef = useCallback(
-    (el: HTMLDivElement | null, index: number) => {
-      connectorRefs.current[index] = el;
+    (el: HTMLDivElement | null, i: number) => {
+      connectorRefs.current[i] = el;
+    },
+    []
+  );
+  const setSegmentRef = useCallback(
+    (el: HTMLDivElement | null, i: number) => {
+      segmentRefs.current[i] = el;
     },
     []
   );
 
-  // Mobile detection
+  /* ---- Precompute timeline positions ---- */
+  const timelineData = useMemo(() => {
+    if (items.length === 0) return null;
+    const range = getTimelineRange(items);
+    const markers = generateTimeMarkers(range);
+    const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30.44;
+    const totalMonths = (range.end - range.start) / MS_PER_MONTH;
+
+    const positions = items.map((edu) => {
+      const startTs = parseDateTs(edu.start_date) ?? range.start;
+      const endTs = edu.end_date
+        ? (parseDateTs(edu.end_date) ?? range.end)
+        : Date.now();
+      const startPct = dateToPercent(startTs, range);
+      const endPct = dateToPercent(endTs, range);
+      const midPct = (startPct + endPct) / 2;
+      return {
+        startPct,
+        endPct,
+        midPct,
+        widthPct: endPct - startPct,
+      };
+    });
+
+    return { range, markers, positions, totalMonths };
+  }, [items]);
+
+  /* ---- Content width in vw (responsive, SSR-safe) ---- */
+  const contentWidthVW = useMemo(() => {
+    if (!timelineData) return 100;
+    const years = timelineData.totalMonths / 12;
+    return Math.max(150, years * 30);
+  }, [timelineData]);
+
+  /* ---- Mobile detection ---- */
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
-  // GSAP pinned horizontal timeline animation (desktop only)
+  /* ---- GSAP: immersive sliding timeline (desktop) ---- */
   const gsapCtxRef = useRef<gsap.Context | null>(null);
 
   useEffect(() => {
-    if (isMobile) return;
-    if (!sectionRef.current || !pinContainerRef.current) return;
-    if (items.length === 0) return;
+    if (
+      isMobile ||
+      !sectionRef.current ||
+      !pinContainerRef.current ||
+      !timelineContentRef.current ||
+      !timelineData
+    )
+      return;
 
     const timer = setTimeout(() => {
       const ctx = gsap.context(() => {
         const section = sectionRef.current!;
-        const totalCards = items.length;
-        const scrollEnd = window.innerHeight * (totalCards + 1);
+        const contentEl = timelineContentRef.current!;
+        const totalYears = timelineData.totalMonths / 12;
 
-        // Create main ScrollTrigger that pins the section
+        // Scroll distance proportional to time span
+        const scrollEnd = window.innerHeight * Math.max(3, totalYears * 1.2);
+
+        // Measurements for sliding
+        const contentW = contentEl.offsetWidth;
+        const center = window.innerWidth / 2;
+
+        // Pin the section
         ScrollTrigger.create({
           trigger: section,
           pin: pinContainerRef.current,
@@ -128,23 +248,22 @@ export default function EducationSection({
           pinSpacing: true,
         });
 
-        // Animate the timeline progress line
-        if (timelineProgressRef.current) {
-          gsap.fromTo(
-            timelineProgressRef.current,
-            { scaleX: 0 },
-            {
-              scaleX: 1,
-              ease: "none",
-              scrollTrigger: {
-                trigger: section,
-                start: "top top",
-                end: () => `+=${scrollEnd}`,
-                scrub: 0.5,
-              },
-            }
-          );
-        }
+        // Slide the entire timeline content so the indicator
+        // starts at 0% and ends at 100% of the timeline
+        gsap.fromTo(
+          contentEl,
+          { x: center },
+          {
+            x: -(contentW - center),
+            ease: "none",
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: () => `+=${scrollEnd}`,
+              scrub: 0.3,
+            },
+          }
+        );
 
         // Fade out scroll hint
         if (scrollHintRef.current) {
@@ -160,57 +279,41 @@ export default function EducationSection({
           });
         }
 
-        // Animate each card, dot, year label, and connector in sequence
-        cardRefs.current.forEach((card, index) => {
-          if (!card) return;
+        // Per-item animations
+        timelineData.positions.forEach((pos, index) => {
+          const startFrac = pos.startPct / 100;
+          const endFrac = pos.endPct / 100;
+          const periodLen = endFrac - startFrac;
+          const isAbove = index % 2 === 0;
 
-          const startFraction = (index + 0.3) / (totalCards + 1);
-          const endFraction = (index + 0.85) / (totalCards + 1);
+          // Buffer for appear / disappear (fraction of total scroll)
+          const buffer = Math.min(0.06, periodLen * 0.25);
+          const rangeStart = Math.max(0, startFrac - buffer);
+          const rangeEnd = Math.min(1, endFrac + buffer);
+          const totalRange = rangeEnd - rangeStart;
+          const appearPart = buffer / totalRange;
+          const disappearPart = buffer / totalRange;
 
-          // Card: slide in from above/below and fade in
-          gsap.fromTo(
-            card,
-            {
-              opacity: 0,
-              y: index % 2 === 0 ? -60 : 60,
-              scale: 0.9,
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: section,
-                start: `top+=${scrollEnd * startFraction} top`,
-                end: `top+=${scrollEnd * endFraction} top`,
-                scrub: 0.8,
-              },
-            }
-          );
-
-          // Stagger internal content
-          const children = card.querySelectorAll(".tl-stagger");
-          if (children.length > 0) {
+          // --- Highlighted segment: fills as indicator passes through ---
+          const segment = segmentRefs.current[index];
+          if (segment) {
             gsap.fromTo(
-              children,
-              { opacity: 0, y: 15 },
+              segment,
+              { scaleX: 0 },
               {
-                opacity: 1,
-                y: 0,
-                stagger: 0.04,
-                ease: "power2.out",
+                scaleX: 1,
+                ease: "none",
                 scrollTrigger: {
                   trigger: section,
-                  start: `top+=${scrollEnd * (startFraction + 0.05)} top`,
-                  end: `top+=${scrollEnd * endFraction} top`,
-                  scrub: 0.8,
+                  start: `top+=${scrollEnd * startFrac} top`,
+                  end: `top+=${scrollEnd * endFrac} top`,
+                  scrub: 0.5,
                 },
               }
             );
           }
 
-          // Dot: scale in with bounce
+          // --- Dot: appears and stays ---
           const dot = dotRefs.current[index];
           if (dot) {
             gsap.fromTo(
@@ -222,17 +325,12 @@ export default function EducationSection({
                 ease: "back.out(2)",
                 scrollTrigger: {
                   trigger: section,
-                  start: `top+=${scrollEnd * (startFraction - 0.05)} top`,
-                  end: `top+=${scrollEnd * startFraction} top`,
+                  start: `top+=${scrollEnd * Math.max(0, startFrac - 0.02)} top`,
+                  end: `top+=${scrollEnd * startFrac} top`,
                   scrub: 0.5,
-                  onEnter: () => dot.classList.add("timeline-dot-active"),
-                  onLeaveBack: () =>
-                    dot.classList.remove("timeline-dot-active"),
                 },
               }
             );
-
-            // Pulse ring
             const pulse = dot.querySelector(".tl-dot-pulse");
             if (pulse) {
               gsap.fromTo(
@@ -244,8 +342,8 @@ export default function EducationSection({
                   ease: "power2.out",
                   scrollTrigger: {
                     trigger: section,
-                    start: `top+=${scrollEnd * startFraction} top`,
-                    end: `top+=${scrollEnd * (startFraction + 0.08)} top`,
+                    start: `top+=${scrollEnd * startFrac} top`,
+                    end: `top+=${scrollEnd * (startFrac + 0.04)} top`,
                     scrub: 0.5,
                   },
                 }
@@ -253,43 +351,79 @@ export default function EducationSection({
             }
           }
 
-          // Year label
-          const year = yearRefs.current[index];
-          if (year) {
-            gsap.fromTo(
-              year,
+          // --- Duration label: appear + disappear ---
+          const label = durationLabelRefs.current[index];
+          if (label) {
+            const labelTl = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                start: `top+=${scrollEnd * rangeStart} top`,
+                end: `top+=${scrollEnd * rangeEnd} top`,
+                scrub: 0.5,
+              },
+            });
+            labelTl.fromTo(
+              label,
               { opacity: 0, scale: 0.7 },
-              {
-                opacity: 1,
-                scale: 1,
-                ease: "power2.out",
-                scrollTrigger: {
-                  trigger: section,
-                  start: `top+=${scrollEnd * (startFraction - 0.03)} top`,
-                  end: `top+=${scrollEnd * startFraction} top`,
-                  scrub: 0.5,
-                },
-              }
+              { opacity: 1, scale: 1, duration: appearPart, ease: "power2.out" },
+              0
+            );
+            labelTl.to(
+              label,
+              { opacity: 0, scale: 0.7, duration: disappearPart, ease: "power2.in" },
+              1 - disappearPart
             );
           }
 
-          // Connector line from dot to card
+          // --- Connector: appear + disappear ---
           const connector = connectorRefs.current[index];
           if (connector) {
-            gsap.fromTo(
+            const connTl = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                start: `top+=${scrollEnd * rangeStart} top`,
+                end: `top+=${scrollEnd * rangeEnd} top`,
+                scrub: 0.5,
+              },
+            });
+            connTl.fromTo(
               connector,
               { scaleY: 0, opacity: 0 },
-              {
-                scaleY: 1,
-                opacity: 1,
-                ease: "power2.out",
-                scrollTrigger: {
-                  trigger: section,
-                  start: `top+=${scrollEnd * (startFraction - 0.02)} top`,
-                  end: `top+=${scrollEnd * (startFraction + 0.05)} top`,
-                  scrub: 0.5,
-                },
-              }
+              { scaleY: 1, opacity: 1, duration: appearPart, ease: "power2.out" },
+              0
+            );
+            connTl.to(
+              connector,
+              { scaleY: 0, opacity: 0, duration: disappearPart, ease: "power2.in" },
+              1 - disappearPart
+            );
+          }
+
+          // --- Card: appear + zoom-out disappear ---
+          const card = cardRefs.current[index];
+          if (card) {
+            const cardTl = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                start: `top+=${scrollEnd * rangeStart} top`,
+                end: `top+=${scrollEnd * rangeEnd} top`,
+                scrub: 0.8,
+              },
+            });
+
+            // Appear: slide in from direction + scale up + fade in
+            cardTl.fromTo(
+              card,
+              { opacity: 0, y: isAbove ? -50 : 50, scale: 0.85 },
+              { opacity: 1, y: 0, scale: 1, duration: appearPart, ease: "power3.out" },
+              0
+            );
+
+            // Disappear: zoom out + fade out
+            cardTl.to(
+              card,
+              { opacity: 0, scale: 0.8, duration: disappearPart, ease: "power2.in" },
+              1 - disappearPart
             );
           }
         });
@@ -303,9 +437,9 @@ export default function EducationSection({
       gsapCtxRef.current?.revert();
       gsapCtxRef.current = null;
     };
-  }, [isMobile, items.length]);
+  }, [isMobile, items.length, timelineData, contentWidthVW]);
 
-  // Shared helper: parse coursework comma-separated string into array
+  /* ---- Shared helpers ---- */
   const parseCoursework = (coursework?: string): string[] => {
     if (!coursework) return [];
     return coursework
@@ -314,16 +448,22 @@ export default function EducationSection({
       .filter(Boolean);
   };
 
-  // Shared helper: check if a RichTextField has actual content
   const hasRichText = (field?: RichTextField): boolean => {
     if (!field || !Array.isArray(field) || field.length === 0) return false;
     return field.some(
-      (block) => "text" in block && typeof block.text === "string" && block.text.trim() !== ""
+      (block) =>
+        "text" in block &&
+        typeof block.text === "string" &&
+        block.text.trim() !== ""
     );
   };
 
-  // Desktop: Pinned horizontal timeline
-  if (!isMobile) {
+  /* ================================================================ */
+  /*  Desktop: Immersive sliding timeline                              */
+  /* ================================================================ */
+  if (!isMobile && timelineData) {
+    const { markers, positions } = timelineData;
+
     return (
       <section
         ref={sectionRef}
@@ -334,7 +474,7 @@ export default function EducationSection({
           ref={pinContainerRef}
           className="relative h-screen w-full overflow-hidden flex flex-col"
         >
-          {/* Section Header — top area */}
+          {/* Section Header */}
           <div className="pt-16 sm:pt-20 pb-4 px-4 sm:px-6 lg:px-8 flex-shrink-0">
             <div className="max-w-6xl mx-auto">
               <motion.div
@@ -363,28 +503,87 @@ export default function EducationSection({
             </div>
           </div>
 
-          {/* Timeline area — fills remaining space */}
-          <div className="flex-1 relative flex items-center">
-            {/* Horizontal timeline track (centered vertically) */}
-            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 px-8 sm:px-16">
-              {/* Background track line */}
-              <div
-                ref={timelineTrackRef}
-                className="h-[2px] w-full bg-border/20 rounded-full"
-              />
-              {/* Progress line */}
-              <div
-                ref={timelineProgressRef}
-                className="absolute top-0 left-0 right-0 h-[2px] bg-accent rounded-full origin-left"
-                style={{ transform: "scaleX(0)" }}
-              />
+          {/* Timeline area — fills remaining viewport height */}
+          <div className="flex-1 relative overflow-hidden">
+            {/* ---- Fixed center indicator (playhead) ---- */}
+            <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 z-40 pointer-events-none flex flex-col items-center">
+              {/* Upper gradient line */}
+              <div className="flex-1 w-px bg-gradient-to-b from-transparent via-accent/10 to-accent/25" />
+              {/* Glowing dot on the timeline */}
+              <div className="relative flex items-center justify-center">
+                <div className="w-3 h-3 rounded-full bg-accent shadow-[0_0_12px_3px] shadow-accent/30 z-10" />
+                <div
+                  className="absolute w-6 h-6 rounded-full bg-accent/15 animate-ping"
+                  style={{ animationDuration: "2s" }}
+                />
+              </div>
+              {/* Lower gradient line */}
+              <div className="flex-1 w-px bg-gradient-to-t from-transparent via-accent/10 to-accent/25" />
             </div>
 
-            {/* Education items positioned along the timeline */}
-            <div className="absolute inset-0 px-8 sm:px-16">
+            {/* ---- Sliding timeline content ---- */}
+            <div
+              ref={timelineContentRef}
+              className="absolute top-0 bottom-0 left-0 will-change-transform"
+              style={{ width: `${contentWidthVW}vw` }}
+            >
+              {/* Track + markers at vertical center */}
+              <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2">
+                {/* Background track line */}
+                <div className="h-[2px] w-full bg-border/20 rounded-full" />
+
+                {/* Highlighted segments for each education period */}
+                {items.map((_, index) => {
+                  const pos = positions[index];
+                  return (
+                    <div
+                      key={`seg-${index}`}
+                      ref={(el) => setSegmentRef(el, index)}
+                      className="absolute top-0 h-[2px] bg-accent rounded-full origin-left shadow-[0_0_6px_1px] shadow-accent/40"
+                      style={{
+                        left: `${pos.startPct}%`,
+                        width: `${pos.widthPct}%`,
+                        transform: "scaleX(0)",
+                      }}
+                    />
+                  );
+                })}
+
+                {/* Year labels below the track */}
+                {markers.years.map((yr) => (
+                  <div
+                    key={yr.year}
+                    className="absolute -translate-x-1/2 flex flex-col items-center pointer-events-none"
+                    style={{ left: `${yr.percent}%`, top: "2px" }}
+                  >
+                    <div className="w-px h-[10px] bg-border/40" />
+                    <span className="mt-0.5 font-mono text-[10px] text-muted-foreground/50 font-semibold select-none">
+                      {yr.year}
+                    </span>
+                  </div>
+                ))}
+
+                {/* Month ticks below the track */}
+                {markers.months.map((mo, i) => (
+                  <div
+                    key={`mo-${i}`}
+                    className="absolute -translate-x-1/2 pointer-events-none"
+                    style={{ left: `${mo.percent}%`, top: "2px" }}
+                  >
+                    <div
+                      className={`w-px ${
+                        mo.month % 3 === 0
+                          ? "h-[6px] bg-border/25"
+                          : "h-[3px] bg-border/12"
+                      }`}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Education items positioned along the timeline */}
               {items.map((edu, index) => {
-                const positionPercent =
-                  ((index + 1) / (items.length + 1)) * 100;
+                const pos = positions[index];
                 const isAbove = index % 2 === 0;
                 const duration = formatDuration(edu.start_date, edu.end_date);
                 const courses = parseCoursework(edu.coursework);
@@ -397,7 +596,7 @@ export default function EducationSection({
                     key={index}
                     className="absolute"
                     style={{
-                      left: `${positionPercent}%`,
+                      left: `${pos.midPct}%`,
                       top: "50%",
                       transform: "translateX(-50%)",
                     }}
@@ -405,15 +604,14 @@ export default function EducationSection({
                     {/* Timeline dot */}
                     <div
                       ref={(el) => setDotRef(el, index)}
-                      className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-border bg-background z-20 transition-colors duration-300 opacity-0"
+                      className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-accent bg-background z-20 opacity-0"
                     >
                       <div className="tl-dot-pulse absolute inset-[-6px] rounded-full bg-accent/40" />
-                      <div className="absolute inset-[3px] rounded-full bg-accent/0 transition-all duration-300" />
                     </div>
 
-                    {/* Year label */}
+                    {/* Duration label */}
                     <span
-                      ref={(el) => setYearRef(el, index)}
+                      ref={(el) => setDurationLabelRef(el, index)}
                       className={`absolute left-1/2 -translate-x-1/2 font-mono text-[11px] font-semibold text-accent whitespace-nowrap px-2.5 py-1 rounded-full bg-accent/10 border border-accent/20 opacity-0 ${
                         isAbove ? "top-[16px]" : "bottom-[16px]"
                       }`}
@@ -439,7 +637,7 @@ export default function EducationSection({
                         isAbove ? "bottom-[56px]" : "top-[56px]"
                       }`}
                       style={{
-                        width: "clamp(340px, 32vw, 480px)",
+                        width: "clamp(340px, 28vw, 460px)",
                       }}
                     >
                       <div className="terminal-card overflow-hidden shadow-lg shadow-black/10">
@@ -457,7 +655,7 @@ export default function EducationSection({
 
                         <div className="p-5 space-y-3">
                           {/* Degree header */}
-                          <div className="tl-stagger">
+                          <div>
                             <h3 className="font-mono text-base font-bold text-foreground leading-tight">
                               {edu.degree}
                             </h3>
@@ -497,7 +695,7 @@ export default function EducationSection({
 
                           {/* GPA badge */}
                           {edu.gpa && (
-                            <div className="tl-stagger">
+                            <div>
                               <span className="font-mono text-[10px] px-2.5 py-1 rounded bg-accent/10 border border-accent/20 text-accent font-semibold">
                                 GPA: {edu.gpa}
                               </span>
@@ -506,14 +704,14 @@ export default function EducationSection({
 
                           {/* Description */}
                           {hasRichText(edu.description) && (
-                            <div className="tl-stagger text-xs font-mono text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
+                            <div className="text-xs font-mono text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
                               <PrismicRichText field={edu.description} />
                             </div>
                           )}
 
                           {/* Coursework */}
                           {courses.length > 0 && (
-                            <div className="tl-stagger">
+                            <div>
                               <h4 className="font-mono text-[10px] text-accent/60 uppercase tracking-wide mb-1.5">
                                 # relevant coursework
                               </h4>
@@ -532,7 +730,7 @@ export default function EducationSection({
 
                           {/* Achievements */}
                           {hasRichText(edu.achievements) && (
-                            <div className="tl-stagger">
+                            <div>
                               <h4 className="font-mono text-[10px] text-accent/60 uppercase tracking-wide mb-1.5">
                                 # achievements
                               </h4>
@@ -549,10 +747,10 @@ export default function EducationSection({
               })}
             </div>
 
-            {/* Scroll hint */}
+            {/* Scroll hint (stays fixed, not inside sliding container) */}
             <div
               ref={scrollHintRef}
-              className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-30"
             >
               <span className="font-mono text-[10px] text-muted-foreground/60 tracking-widest uppercase">
                 scroll to explore
@@ -575,12 +773,11 @@ export default function EducationSection({
     );
   }
 
-  // Mobile: Vertical timeline fallback
+  /* ================================================================ */
+  /*  Mobile: Vertical timeline fallback                               */
+  /* ================================================================ */
   return (
-    <section
-      id={sectionId}
-      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8"
-    >
+    <section id={sectionId} className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Section Header */}
         <motion.div
@@ -633,7 +830,6 @@ export default function EducationSection({
 
                   {/* Terminal card */}
                   <div className="terminal-card overflow-hidden">
-                    {/* Terminal header bar */}
                     <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50 bg-muted/30">
                       <div className="flex gap-1">
                         <div className="w-2 h-2 rounded-full bg-red-500/60" />
@@ -674,7 +870,6 @@ export default function EducationSection({
                         )}
                       </div>
 
-                      {/* Description */}
                       {hasRichText(edu.description) && (
                         <div className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
                           <PrismicRichText field={edu.description} />
