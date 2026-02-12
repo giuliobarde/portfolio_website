@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Urbanist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ConditionalHeader from "@/components/ConditionalHeader";
@@ -52,6 +53,13 @@ export default function RootLayout({
       <body
         className={`${urbanist.variable} ${jetbrainsMono.variable} ${urbanist.className}`}
       >
+        <Script
+          id="scroll-restoration"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `if('scrollRestoration'in history){history.scrollRestoration='manual'}`,
+          }}
+        />
         <ScrollHandler />
         <ConditionalHeader />
         {children}
