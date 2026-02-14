@@ -8,14 +8,14 @@ import Link from "next/link";
 import Button from "./Button";
 import { usePathname } from "next/navigation";
 import { HiMenu, HiX } from "react-icons/hi";
+import { extractPrismicUrl, HEADER_SCROLL_OFFSET } from "@/lib/prismic-helpers";
 
 // Helper function to scroll to a section smoothly
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId);
   if (element) {
-    const headerOffset = 100; // Offset for sticky header
     const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    const offsetPosition = elementPosition + window.pageYOffset - HEADER_SCROLL_OFFSET;
 
     window.scrollTo({
       top: offsetPosition,
@@ -32,35 +32,8 @@ const NavLink: React.FC<{
   onClose?: () => void;
 }> = ({ link, label, pathname, onClose }) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const linkUrl = asLink(link);
-    
-    // Handle different link formats
-    let urlString = '';
-    if (typeof linkUrl === 'string') {
-      urlString = linkUrl;
-    } else if (linkUrl && typeof linkUrl === 'object' && 'url' in linkUrl) {
-      // Check for url property
-      const urlValue = (linkUrl as { url?: string }).url;
-      if (typeof urlValue === 'string') {
-        urlString = urlValue;
-      }
-    }
-    
-    // Also check the raw link object for text content (for 'Any' link type)
-    if (!urlString && link && typeof link === 'object') {
-      if ('link_type' in link && link.link_type === 'Web' && 'url' in link && typeof link.url === 'string') {
-        urlString = link.url;
-      } else if ('link_type' in link && link.link_type === 'Document' && 'url' in link && typeof link.url === 'string') {
-        urlString = link.url;
-      } else if ('link_type' in link && link.link_type === 'Any' && 'text' in link && typeof link.text === 'string') {
-        // Handle 'Any' link type - the hash link is in the 'text' property
-        urlString = link.text;
-      } else if ('text' in link && typeof link.text === 'string') {
-        // Fallback: check for text property regardless of link_type
-        urlString = link.text;
-      }
-    }
-    
+    const urlString = extractPrismicUrl(link);
+
     // Check if it's a hash link (starts with #)
     if (urlString.startsWith('#')) {
       e.preventDefault();
@@ -88,36 +61,9 @@ const NavLink: React.FC<{
     }
   };
 
-  // Extract URL string with better handling of Prismic link formats
-  let urlString = '';
-  const linkUrl = asLink(link);
-  
-  if (typeof linkUrl === 'string') {
-    urlString = linkUrl;
-  } else if (linkUrl && typeof linkUrl === 'object' && 'url' in linkUrl) {
-    const urlValue = (linkUrl as { url?: string }).url;
-    if (typeof urlValue === 'string') {
-      urlString = urlValue;
-    }
-  }
-  
-  // Also check raw link object for text/web links
-  if (!urlString && link && typeof link === 'object') {
-    if ('link_type' in link && link.link_type === 'Web' && 'url' in link && typeof link.url === 'string') {
-      urlString = link.url;
-    } else if ('link_type' in link && link.link_type === 'Document' && 'url' in link && typeof link.url === 'string') {
-      urlString = link.url;
-    } else if ('link_type' in link && link.link_type === 'Any' && 'text' in link && typeof link.text === 'string') {
-      // Handle 'Any' link type - the hash link is in the 'text' property
-      urlString = link.text;
-    } else if ('text' in link && typeof link.text === 'string') {
-      // Fallback: check for text property regardless of link_type
-      urlString = link.text;
-    }
-  }
-  
+  const urlString = extractPrismicUrl(link);
   const isHashLink = urlString.startsWith('#');
-  const isActive = pathname === '/' && isHashLink 
+  const isActive = pathname === '/' && isHashLink
     ? false // Hash links on homepage are handled differently
     : pathname.includes(asLink(link) as string);
 
@@ -199,9 +145,9 @@ export default function NavBar({
             </button>
         </div>
         <DesktopMenu settings={settings} pathname={pathname} />
-        <MobileMenu 
-          settings={settings} 
-          pathname={pathname} 
+        <MobileMenu
+          settings={settings}
+          pathname={pathname}
           isOpen={isMobileMenuOpen}
           onClose={closeMobileMenu}
         />
@@ -249,8 +195,8 @@ function DesktopMenu({
         </React.Fragment>
       ))}
       <li>
-        <Button 
-            label={settings.data.resume_text} 
+        <Button
+            label={settings.data.resume_text}
             linkField={settings.data.resume_link}
           />
       </li>
@@ -275,30 +221,12 @@ function MobileMenu({
     <div className="absolute top-full left-0 right-0 z-50 mt-2 rounded-lg bg-slate-50 shadow-lg md:hidden">
       <ul className="flex flex-col py-4">
         {settings.data.nav_item.map(({ link, label }) => {
-          const linkUrl = asLink(link);
-          let urlString = typeof linkUrl === 'string' ? linkUrl : '';
-          
-          if (typeof linkUrl === 'object' && linkUrl && 'url' in linkUrl) {
-            const urlValue = (linkUrl as { url?: string }).url;
-            if (typeof urlValue === 'string') {
-              urlString = urlValue;
-            }
-          }
-          
-          // Handle 'Any' link type where hash is in text property
-          if (!urlString && link && typeof link === 'object') {
-            if ('link_type' in link && link.link_type === 'Any' && 'text' in link && typeof link.text === 'string') {
-              urlString = link.text;
-            } else if ('text' in link && typeof link.text === 'string') {
-              urlString = link.text;
-            }
-          }
-          
+          const urlString = extractPrismicUrl(link);
           const isHashLink = urlString.startsWith('#');
-          const isActive = pathname === '/' && isHashLink 
+          const isActive = pathname === '/' && isHashLink
             ? false
             : pathname.includes(asLink(link) as string);
-          
+
           return (
             <li key={label}>
               {isHashLink ? (
@@ -325,32 +253,15 @@ function MobileMenu({
                   )}
                   field={link}
                   onClick={(e) => {
-                    const linkUrl = asLink(link);
-                    let urlString = typeof linkUrl === 'string' ? linkUrl : '';
-                    
-                    if (typeof linkUrl === 'object' && linkUrl && 'url' in linkUrl) {
-                      const urlValue = (linkUrl as { url?: string }).url;
-                      if (typeof urlValue === 'string') {
-                        urlString = urlValue;
-                      }
-                    }
-                    
-                    // Handle 'Any' link type where hash is in text property
-                    if (!urlString && link && typeof link === 'object') {
-                      if ('link_type' in link && link.link_type === 'Any' && 'text' in link && typeof link.text === 'string') {
-                        urlString = link.text;
-                      } else if ('text' in link && typeof link.text === 'string') {
-                        urlString = link.text;
-                      }
-                    }
-                    
-                    if (urlString.includes('#')) {
+                    const clickUrlString = extractPrismicUrl(link);
+
+                    if (clickUrlString.includes('#')) {
                       e.preventDefault();
-                      const [path, hash] = urlString.split('#');
+                      const [path, hash] = clickUrlString.split('#');
                       if (pathname === path || path === window.location.pathname) {
                         scrollToSection(hash);
                       } else {
-                        window.location.href = urlString;
+                        window.location.href = clickUrlString;
                       }
                     }
                     onClose();
@@ -364,8 +275,8 @@ function MobileMenu({
           );
         })}
         <li className="px-4 py-3">
-          <Button 
-            label={settings.data.resume_text} 
+          <Button
+            label={settings.data.resume_text}
             linkField={settings.data.resume_link}
             className="w-full justify-center"
           />

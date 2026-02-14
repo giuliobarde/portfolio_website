@@ -1,125 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Content, asLink, isFilled, RichTextField, LinkField } from "@prismicio/client";
+import { Content, LinkField } from "@prismicio/client";
 import { PrismicRichText } from "@prismicio/react";
 import { PrismicNextLink } from "@prismicio/next";
 import Image from "next/image";
+import { extractPrismicUrl } from "@/lib/prismic-helpers";
+import TechStackBadges from "@/components/TechStackBadges";
 
 type ProjectModalProps = {
     project: Content.ProjectsSliceDefaultPrimaryProjectsItem;
     onClose: () => void;
-};
-
-// Component to extract and display tech stack as badges
-const TechStackBadges: React.FC<{ field: RichTextField }> = ({ field }) => {
-    // Extract text content from rich text field
-    const extractText = (richTextField: RichTextField): string[] => {
-        if (!richTextField) return [];
-        
-        const items: string[] = [];
-        
-        richTextField.forEach((block: unknown) => {
-            if (typeof block !== 'object' || block === null) return;
-            
-            const blockObj = block as Record<string, unknown>;
-            
-            if (blockObj.type === 'paragraph' || blockObj.type === 'heading1' || blockObj.type === 'heading2' || blockObj.type === 'heading3') {
-                const content = blockObj.content;
-                if (Array.isArray(content)) {
-                    content.forEach((span: unknown) => {
-                        if (typeof span === 'object' && span !== null) {
-                            const spanObj = span as Record<string, unknown>;
-                            if (typeof spanObj.text === 'string' && spanObj.text.trim()) {
-                                items.push(spanObj.text.trim());
-                            }
-                        }
-                    });
-                }
-            } else if (blockObj.type === 'list-item' || blockObj.type === 'o-list-item') {
-                const content = blockObj.content;
-                if (Array.isArray(content)) {
-                    content.forEach((span: unknown) => {
-                        if (typeof span === 'object' && span !== null) {
-                            const spanObj = span as Record<string, unknown>;
-                            if (typeof spanObj.text === 'string' && spanObj.text.trim()) {
-                                items.push(spanObj.text.trim());
-                            }
-                        }
-                    });
-                }
-            } else if (blockObj.type === 'preformatted') {
-                // Handle preformatted text (often used for comma-separated lists)
-                const text = typeof blockObj.text === 'string' ? blockObj.text : '';
-                if (text.includes(',')) {
-                    text.split(',').forEach((item: string) => {
-                        const trimmed = item.trim();
-                        if (trimmed) items.push(trimmed);
-                    });
-                } else if (text.trim()) {
-                    items.push(text.trim());
-                }
-            }
-        });
-        
-        // If we got items, return them; otherwise fallback to rendering as rich text
-        return items.length > 0 ? items : [];
-    };
-    
-    const techItems = extractText(field);
-    
-    // If we extracted items, show as badges; otherwise render as rich text
-    if (techItems.length > 0) {
-        return (
-            <div className="flex flex-wrap gap-2">
-                {techItems.map((item, index) => (
-                    <span
-                        key={index}
-                        className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800/60 border border-slate-600/50 text-slate-300 hover:bg-slate-700/60 hover:border-yellow-400/50 hover:text-yellow-400 transition-all duration-200"
-                    >
-                        {item}
-                    </span>
-                ))}
-            </div>
-        );
-    }
-    
-    // Fallback to rich text rendering if extraction didn't work
-    return (
-        <div className="text-slate-300">
-            <PrismicRichText 
-                field={field}
-                components={{
-                    paragraph: ({ children }) => {
-                        const childrenStr = String(children || '');
-                        if (childrenStr.includes(',')) {
-                            return (
-                                <div className="flex flex-wrap gap-2 mb-2">
-                                    {childrenStr.split(',').map((item: string, i: number) => (
-                                        <span
-                                            key={i}
-                                            className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800/60 border border-slate-600/50 text-slate-300 hover:bg-slate-700/60 hover:border-yellow-400/50 hover:text-yellow-400 transition-all duration-200"
-                                        >
-                                            {item.trim()}
-                                        </span>
-                                    ))}
-                                </div>
-                            );
-                        }
-                        return <div className="mb-2">{children}</div>;
-                    },
-                    list: ({ children }) => (
-                        <div className="flex flex-wrap gap-2">
-                            {children}
-                        </div>
-                    ),
-                    listItem: ({ children }) => (
-                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800/60 border border-slate-600/50 text-slate-300 hover:bg-slate-700/60 hover:border-yellow-400/50 hover:text-yellow-400 transition-all duration-200">
-                            {children}
-                        </span>
-                    ),
-                }}
-            />
-        </div>
-    );
 };
 
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
@@ -131,40 +20,18 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
         if (!Array.isArray(project.project_link) || project.project_link.length === 0) {
             return null;
         }
-        
-        // Helper function to extract URL from a link field
-        const extractUrl = (link: LinkField): string | null => {
-            if (!isFilled.link(link)) {
-                return null;
-            }
-            
-            const resolvedLink = asLink(link);
-            if (typeof resolvedLink === 'string') {
-                return resolvedLink;
-            }
-            
-            // Handle LinkField object
-            if (resolvedLink && typeof resolvedLink === 'object' && 'url' in resolvedLink) {
-                return (resolvedLink as { url?: string }).url || null;
-            }
-            
-            return null;
-        };
-        
+
         // Filter out GitHub links and find the first web page link
         const webPageLink = project.project_link.find(link => {
-            const url = extractUrl(link);
+            const url = extractPrismicUrl(link);
             if (!url) return false;
-            // Exclude GitHub links
             return !url.toLowerCase().includes('github.com');
         });
-        
-        // If found a web page link, return it
+
         if (webPageLink) {
-            return extractUrl(webPageLink);
+            return extractPrismicUrl(webPageLink) || null;
         }
-        
-        // If no web page link found, return null (don't use GitHub for preview)
+
         return null;
     };
     
@@ -172,24 +39,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
     
     // Helper function to get descriptive label for a link
     const getLinkLabel = (link: LinkField): string => {
-        const extractUrl = (linkField: LinkField): string | null => {
-            if (!isFilled.link(linkField)) {
-                return null;
-            }
-            
-            const resolvedLink = asLink(linkField);
-            if (typeof resolvedLink === 'string') {
-                return resolvedLink;
-            }
-            
-            if (resolvedLink && typeof resolvedLink === 'object' && 'url' in resolvedLink) {
-                return (resolvedLink as { url?: string }).url || null;
-            }
-            
-            return null;
-        };
-        
-        const url = extractUrl(link);
+        const url = extractPrismicUrl(link);
         if (!url) return 'Visit Link';
         
         const urlLower = url.toLowerCase();

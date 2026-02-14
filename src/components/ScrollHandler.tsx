@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { HEADER_SCROLL_OFFSET } from "@/lib/prismic-helpers";
 
 export default function ScrollHandler() {
   const pathname = usePathname();
@@ -19,7 +20,7 @@ export default function ScrollHandler() {
         setTimeout(() => {
           const element = document.getElementById(hash);
           if (element) {
-            const headerOffset = 100;
+            const headerOffset = HEADER_SCROLL_OFFSET;
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
