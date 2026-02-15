@@ -5,12 +5,12 @@ import type * as prismic from "@prismicio/client";
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] };
 
 type HomepageDocumentDataSlicesSlice =
-  | WorkExperienceSlice 
-  | EducationSlice
   | ProjectsSlice
   | TechListSlice
   | BiographySlice
-  | HeroSlice;
+  | HeroSlice
+  | EducationSlice
+  | WorkExperienceSlice;
 
 /**
  * Content for Homepage documents
@@ -367,7 +367,18 @@ interface SettingsDocumentData {
    * - **Tab**: Main
    * - **Documentation**: https://prismic.io/docs/field#key-text
    */
-  version: prismic.KeyTextField /**
+  version: prismic.KeyTextField;
+
+  /**
+   * Web Icon field in *Settings*
+   *
+   * - **Field Type**: Image
+   * - **Placeholder**: *None*
+   * - **API ID Path**: settings.web_icon
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/field#image
+   */
+  web_icon: prismic.ImageField<never> /**
    * Meta Title field in *Settings*
    *
    * - **Field Type**: Text

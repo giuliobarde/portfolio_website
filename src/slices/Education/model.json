@@ -10,7 +10,116 @@
       "docURL": "...",
       "version": "initial",
       "description": "Default",
-      "imageUrl": ""
+      "imageUrl": "",
+      "primary": {
+        "section_id": {
+          "type": "Text",
+          "config": {
+            "label": "Section ID",
+            "placeholder": "#education"
+          }
+        },
+        "heading": {
+          "type": "Text",
+          "config": {
+            "label": "Heading",
+            "placeholder": "Education"
+          }
+        },
+        "description": {
+          "type": "StructuredText",
+          "config": {
+            "label": "Description",
+            "placeholder": "",
+            "allowTargetBlank": true,
+            "multi": "paragraph,strong,em,hyperlink"
+          }
+        },
+        "educations": {
+          "type": "Group",
+          "config": {
+            "label": "Educations",
+            "repeat": true,
+            "fields": {
+              "degree": {
+                "type": "Text",
+                "config": {
+                  "label": "Degree",
+                  "placeholder": "e.g. Master of Science"
+                }
+              },
+              "field_of_study": {
+                "type": "Text",
+                "config": {
+                  "label": "Field of study",
+                  "placeholder": "e.g. Data Science"
+                }
+              },
+              "school": {
+                "type": "Text",
+                "config": {
+                  "label": "School",
+                  "placeholder": "e.g. St. John's University"
+                }
+              },
+              "location": {
+                "type": "Text",
+                "config": {
+                  "label": "Location",
+                  "placeholder": "e.g. Queens, NY"
+                }
+              },
+              "start_date": {
+                "type": "Date",
+                "config": {
+                  "label": "Start Date",
+                  "placeholder": ""
+                }
+              },
+              "end_date": {
+                "type": "Date",
+                "config": {
+                  "label": "End Date",
+                  "placeholder": ""
+                }
+              },
+              "gpa": {
+                "type": "Text",
+                "config": {
+                  "label": "GPA",
+                  "placeholder": "e.g. 4.0/4.0"
+                }
+              },
+              "achievements": {
+                "type": "StructuredText",
+                "config": {
+                  "label": "Achievements",
+                  "placeholder": "Academic achievements, honors, etc.",
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,strong,em,hyperlink,list-item,o-list-item"
+                }
+              },
+              "additional_info": {
+                "type": "StructuredText",
+                "config": {
+                  "label": "Additional info",
+                  "placeholder": "Additional details, clubs, etc.",
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,strong,em,hyperlink,list-item,o-list-item"
+                }
+              },
+              "coursework": {
+                "type": "Text",
+                "config": {
+                  "label": "Coursework",
+                  "placeholder": "Machine Learning, Data Science, ..."
+                }
+              }
+            }
+          }
+        }
+      },
+      "items": {}
     }
   ]
 }
