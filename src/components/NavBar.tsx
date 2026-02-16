@@ -130,7 +130,7 @@ export default function NavBar({
     <nav aria-label="Main navigation">
       <ul className="flex flex-col justify-between rounded-b-lg bg-slate-50 px-4 py-2 md:m-4 md:flex-row md:items-center md:rounded-xl border border-slate-200 shadow-sm">
         <div className="flex items-center justify-between w-full md:w-auto">
-            <NameLogo name={settings.data.name} />
+            <NameLogo name={settings.data.name} webIconUrl={settings.data.web_icon?.url ?? undefined} />
             <button
               onClick={toggleMobileMenu}
               className="md:hidden p-2 text-slate-900 hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 rounded transition-colors"
@@ -156,16 +156,25 @@ export default function NavBar({
   );
 }
 
-function NameLogo({ name }: { name: KeyTextField }) {
+function NameLogo({ name, webIconUrl }: { name: KeyTextField; webIconUrl?: string }) {
   return (
     <Link
       href="/"
       aria-label="Home page"
-      className="text-xl font-extrabold tracking-tighter text-slate-900 mono code-style"
+      className="flex items-center gap-2 text-xl font-extrabold tracking-tighter text-slate-900 mono code-style"
     >
-      <span className="code-bracket">{"{"}</span>
-      {name}
-      <span className="code-bracket">{"}"}</span>
+      {webIconUrl && (
+        <img
+          src={webIconUrl}
+          alt=""
+          className="w-7 h-7 rounded-full object-cover"
+        />
+      )}
+      <span>
+        <span className="code-bracket">{"{"}</span>
+        {name}
+        <span className="code-bracket">{"}"}</span>
+      </span>
     </Link>
   );
 }

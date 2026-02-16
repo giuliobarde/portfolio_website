@@ -21,15 +21,19 @@ export default async function V4Page() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const client = createClient();
-  const page = await client.getSingle("homepage");
+  const [page, settings] = await Promise.all([
+    client.getSingle("homepage"),
+    client.getSingle("settings"),
+  ]);
+  const name = settings.data.name || "Portfolio";
 
   return {
-    title: page.data.meta_title ? `${page.data.meta_title} (v4)` : "Portfolio v4",
+    title: page.data.meta_title || name,
     description: page.data.meta_description,
     openGraph: {
       title: isFilled.keyText(page.data.meta_title)
-        ? `${page.data.meta_title} (v4)`
-        : undefined,
+        ? page.data.meta_title
+        : name,
       description: isFilled.keyText(page.data.meta_description)
         ? page.data.meta_description
         : undefined,

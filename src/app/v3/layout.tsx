@@ -3,30 +3,36 @@ import "../globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollHandler from "@/components/v3/ScrollHandler";
+import { createClient } from "@/prismicio";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Portfolio v3",
-    template: "%s | Portfolio v3",
-  },
-  description: "Professional portfolio showcasing projects and skills (Version 3)",
-  keywords: ["portfolio", "developer", "web development", "projects"],
-  authors: [{ name: "Portfolio Owner" }],
-  creator: "Portfolio Owner",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    siteName: "Portfolio v3",
-  },
-  twitter: {
-    card: "summary_large_image",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const client = createClient();
+  const settings = await client.getSingle("settings");
+  const name = settings.data.name || "Portfolio";
+
+  return {
+    title: {
+      default: name,
+      template: `%s | ${name}`,
+    },
+    description: "Professional portfolio showcasing projects and skills",
+    keywords: ["portfolio", "developer", "web development", "projects"],
+    authors: [{ name }],
+    creator: name,
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      siteName: name,
+    },
+    twitter: {
+      card: "summary_large_image",
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default function V3Layout({
   children,

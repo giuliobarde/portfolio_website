@@ -15,9 +15,10 @@ const navItems = [
 
 interface NavbarProps {
   userName?: string;
+  webIconUrl?: string;
 }
 
-export default function Navbar({ userName = "Portfolio" }: NavbarProps) {
+export default function Navbar({ userName = "Portfolio", webIconUrl }: NavbarProps) {
   const [activeSection, setActiveSection] = React.useState("home");
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
@@ -126,15 +127,23 @@ export default function Navbar({ userName = "Portfolio" }: NavbarProps) {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 md:h-16">
-            {/* Terminal-style logo */}
+            {/* Logo */}
             <motion.a
               href="#home"
               onClick={(e) => handleClick(e, "#home")}
-              className="flex items-center gap-1.5 font-mono text-sm md:text-base"
+              className="flex items-center gap-2 font-mono text-sm md:text-base"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="text-accent">$</span>
+              {webIconUrl ? (
+                <img
+                  src={webIconUrl}
+                  alt=""
+                  className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-accent">$</span>
+              )}
               <span className="text-foreground font-semibold">{userName}</span>
               <span className="w-2 h-4 bg-accent/80 cursor-blink inline-block" />
             </motion.a>

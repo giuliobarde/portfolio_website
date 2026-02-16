@@ -7,6 +7,7 @@ import ConditionalFooter from "@/components/ConditionalFooter";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ScrollHandler from "@/components/ScrollHandler";
+import { createClient } from "@/prismicio";
 
 const urbanist = Urbanist({
   variable: "--font-geist-sans",
@@ -19,29 +20,42 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Portfolio",
-    template: "%s | Portfolio",
-  },
-  description: "Professional portfolio showcasing projects and skills",
-  keywords: ["portfolio", "developer", "web development", "projects"],
-  authors: [{ name: "Portfolio Owner" }],
-  creator: "Portfolio Owner",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    siteName: "Portfolio",
-  },
-  twitter: {
-    card: "summary_large_image",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const client = createClient();
+  const settings = await client.getSingle("settings");
+  const webIconUrl = settings.data.web_icon?.url;
+  const name = settings.data.name || "Portfolio";
+
+  return {
+    title: {
+      default: name,
+      template: `%s | ${name}`,
+    },
+    description: "Professional portfolio showcasing projects and skills",
+    keywords: ["portfolio", "developer", "web development", "projects"],
+    authors: [{ name }],
+    creator: name,
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      siteName: name,
+    },
+    twitter: {
+      card: "summary_large_image",
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    ...(webIconUrl && {
+      icons: {
+        icon: webIconUrl,
+        apple: webIconUrl,
+      },
+    }),
+  };
+}
 
 export default function RootLayout({
   children,

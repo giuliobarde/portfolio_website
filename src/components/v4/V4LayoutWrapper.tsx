@@ -21,8 +21,10 @@ const inter = Inter({
 
 export default function V4LayoutWrapper({
   children,
+  webIconUrl,
 }: {
   children: React.ReactNode;
+  webIconUrl?: string;
 }) {
   return (
     <div
@@ -38,7 +40,7 @@ export default function V4LayoutWrapper({
         disableTransitionOnChange={false}
       >
         <BackgroundEffects />
-        <Navbar />
+        <Navbar webIconUrl={webIconUrl} />
         <main className="relative">{children}</main>
 
         {/* Terminal-style footer */}
