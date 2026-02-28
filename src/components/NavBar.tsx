@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { Content, KeyTextField, asLink, LinkField } from "@prismicio/client";
 import { PrismicNextLink } from "@prismicio/next";
 import Link from "next/link";
+import Image from "next/image";
 import Button from "./Button";
 import { usePathname } from "next/navigation";
 import { HiMenu, HiX } from "react-icons/hi";
@@ -164,9 +165,11 @@ function NameLogo({ name, webIconUrl }: { name: KeyTextField; webIconUrl?: strin
       className="flex items-center gap-2 text-xl font-extrabold tracking-tighter text-slate-900 mono code-style"
     >
       {webIconUrl && (
-        <img
+        <Image
           src={webIconUrl}
           alt=""
+          width={28}
+          height={28}
           className="w-7 h-7 rounded-full object-cover"
         />
       )}

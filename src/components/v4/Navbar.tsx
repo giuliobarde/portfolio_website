@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -136,9 +137,11 @@ export default function Navbar({ userName = "Portfolio", webIconUrl }: NavbarPro
               whileTap={{ scale: 0.95 }}
             >
               {webIconUrl ? (
-                <img
+                <Image
                   src={webIconUrl}
                   alt=""
+                  width={32}
+                  height={32}
                   className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover"
                 />
               ) : (
