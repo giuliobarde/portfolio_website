@@ -213,4 +213,71 @@
     transform: scaleX(0);
     box-shadow: 0 0 6px hsl(var(--terminal) / 0.3);
   }
+
+  /* ── Animated gradient glow border ── */
+  @property --border-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  @keyframes rotate-border {
+    to {
+      --border-angle: 360deg;
+    }
+  }
+
+  .glow-border-wrapper {
+    background: hsl(var(--border));
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .glow-border-wrapper:hover,
+  .glow-border-active {
+    background: conic-gradient(
+      from var(--border-angle),
+      hsl(var(--terminal)),
+      hsl(var(--cyan)),
+      hsl(var(--terminal) / 0.3),
+      hsl(var(--cyan)),
+      hsl(var(--terminal))
+    );
+    animation: rotate-border 3s linear infinite;
+  }
+
+  .glow-border-active {
+    box-shadow:
+      0 0 15px hsl(var(--terminal) / 0.2),
+      0 0 45px hsl(var(--terminal) / 0.05);
+  }
+
+  .glow-border-subtle {
+    background: conic-gradient(
+      from var(--border-angle),
+      hsl(var(--border)),
+      hsl(var(--terminal) / 0.3),
+      hsl(var(--border)),
+      hsl(var(--terminal) / 0.3),
+      hsl(var(--border))
+    );
+    animation: rotate-border 6s linear infinite;
+  }
+
+  .timeline-glow-line {
+    box-shadow:
+      0 0 6px hsl(var(--terminal) / 0.4),
+      0 0 20px hsl(var(--terminal) / 0.15);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glow-border-wrapper,
+    .glow-border-active,
+    .glow-border-subtle {
+      animation: none !important;
+      background: hsl(var(--border)) !important;
+    }
+    .glow-border-active {
+      border: 1px solid hsl(var(--terminal) / 0.5);
+    }
+  }
 }
