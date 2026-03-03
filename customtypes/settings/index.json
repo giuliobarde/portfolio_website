@@ -112,6 +112,22 @@
           "constraint": {},
           "thumbnails": []
         }
+      },
+      "website_version": {
+        "type": "Group",
+        "config": {
+          "label": "Website version",
+          "repeat": true,
+          "fields": {
+            "version": {
+              "type": "Text",
+              "config": {
+                "label": "version",
+                "placeholder": ""
+              }
+            }
+          }
+        }
       }
     },
     "SEO and Metadata": {

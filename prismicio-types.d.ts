@@ -243,6 +243,21 @@ export interface SettingsDocumentDataNavItemItem {
 }
 
 /**
+ * Item in *Settings → Website version*
+ */
+export interface SettingsDocumentDataWebsiteVersionItem {
+  /**
+   * version field in *Settings → Website version*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: settings.website_version[].version
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  version: prismic.KeyTextField;
+}
+
+/**
  * Content for Settings documents
  */
 interface SettingsDocumentData {
@@ -378,7 +393,20 @@ interface SettingsDocumentData {
    * - **Tab**: Main
    * - **Documentation**: https://prismic.io/docs/field#image
    */
-  web_icon: prismic.ImageField<never> /**
+  web_icon: prismic.ImageField<never>;
+
+  /**
+   * Website version field in *Settings*
+   *
+   * - **Field Type**: Group
+   * - **Placeholder**: *None*
+   * - **API ID Path**: settings.website_version[]
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/field#group
+   */
+  website_version: prismic.GroupField<
+    Simplify<SettingsDocumentDataWebsiteVersionItem>
+  > /**
    * Meta Title field in *Settings*
    *
    * - **Field Type**: Text
@@ -535,6 +563,158 @@ export type BiographySlice = prismic.SharedSlice<
 >;
 
 /**
+ * Item in *Education → Default → Primary → Educations*
+ */
+export interface EducationSliceDefaultPrimaryEducationsItem {
+  /**
+   * Degree field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: e.g. Master of Science
+   * - **API ID Path**: education.default.primary.educations[].degree
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  degree: prismic.KeyTextField;
+
+  /**
+   * Field of study field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: e.g. Data Science
+   * - **API ID Path**: education.default.primary.educations[].field_of_study
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  field_of_study: prismic.KeyTextField;
+
+  /**
+   * School field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: e.g. St. John's University
+   * - **API ID Path**: education.default.primary.educations[].school
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  school: prismic.KeyTextField;
+
+  /**
+   * Location field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: e.g. Queens, NY
+   * - **API ID Path**: education.default.primary.educations[].location
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  location: prismic.KeyTextField;
+
+  /**
+   * Start Date field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Date
+   * - **Placeholder**: *None*
+   * - **API ID Path**: education.default.primary.educations[].start_date
+   * - **Documentation**: https://prismic.io/docs/field#date
+   */
+  start_date: prismic.DateField;
+
+  /**
+   * End Date field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Date
+   * - **Placeholder**: *None*
+   * - **API ID Path**: education.default.primary.educations[].end_date
+   * - **Documentation**: https://prismic.io/docs/field#date
+   */
+  end_date: prismic.DateField;
+
+  /**
+   * GPA field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: e.g. 4.0/4.0
+   * - **API ID Path**: education.default.primary.educations[].gpa
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  gpa: prismic.KeyTextField;
+
+  /**
+   * Achievements field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: Academic achievements, honors, etc.
+   * - **API ID Path**: education.default.primary.educations[].achievements
+   * - **Documentation**: https://prismic.io/docs/field#rich-text-title
+   */
+  achievements: prismic.RichTextField;
+
+  /**
+   * Additional info field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: Additional details, clubs, etc.
+   * - **API ID Path**: education.default.primary.educations[].additional_info
+   * - **Documentation**: https://prismic.io/docs/field#rich-text-title
+   */
+  additional_info: prismic.RichTextField;
+
+  /**
+   * Coursework field in *Education → Default → Primary → Educations*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: Machine Learning, Data Science, ...
+   * - **API ID Path**: education.default.primary.educations[].coursework
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  coursework: prismic.KeyTextField;
+}
+
+/**
+ * Primary content in *Education → Default → Primary*
+ */
+export interface EducationSliceDefaultPrimary {
+  /**
+   * Section ID field in *Education → Default → Primary*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: #education
+   * - **API ID Path**: education.default.primary.section_id
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  section_id: prismic.KeyTextField;
+
+  /**
+   * Heading field in *Education → Default → Primary*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: Education
+   * - **API ID Path**: education.default.primary.heading
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  heading: prismic.KeyTextField;
+
+  /**
+   * Description field in *Education → Default → Primary*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: education.default.primary.description
+   * - **Documentation**: https://prismic.io/docs/field#rich-text-title
+   */
+  description: prismic.RichTextField;
+
+  /**
+   * Educations field in *Education → Default → Primary*
+   *
+   * - **Field Type**: Group
+   * - **Placeholder**: *None*
+   * - **API ID Path**: education.default.primary.educations[]
+   * - **Documentation**: https://prismic.io/docs/field#group
+   */
+  educations: prismic.GroupField<
+    Simplify<EducationSliceDefaultPrimaryEducationsItem>
+  >;
+}
+
+/**
  * Default variation for Education Slice
  *
  * - **API ID**: `default`
@@ -543,7 +723,7 @@ export type BiographySlice = prismic.SharedSlice<
  */
 export type EducationSliceDefault = prismic.SharedSliceVariation<
   "default",
-  Record<string, never>,
+  Simplify<EducationSliceDefaultPrimary>,
   never
 >;
 
@@ -952,12 +1132,15 @@ declare module "@prismicio/client" {
       SettingsDocument,
       SettingsDocumentData,
       SettingsDocumentDataNavItemItem,
+      SettingsDocumentDataWebsiteVersionItem,
       AllDocumentTypes,
       BiographySlice,
       BiographySliceDefaultPrimary,
       BiographySliceVariation,
       BiographySliceDefault,
       EducationSlice,
+      EducationSliceDefaultPrimaryEducationsItem,
+      EducationSliceDefaultPrimary,
       EducationSliceVariation,
       EducationSliceDefault,
       HeroSlice,

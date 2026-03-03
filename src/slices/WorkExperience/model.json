@@ -10,7 +10,111 @@
       "docURL": "...",
       "version": "initial",
       "description": "Default",
-      "imageUrl": ""
+      "imageUrl": "",
+      "primary": {
+        "section_id": {
+          "type": "Text",
+          "config": {
+            "label": "Section ID",
+            "placeholder": "work"
+          }
+        },
+        "heading": {
+          "type": "Text",
+          "config": {
+            "label": "Heading",
+            "placeholder": "Work Experience"
+          }
+        },
+        "description": {
+          "type": "StructuredText",
+          "config": {
+            "label": "Description",
+            "placeholder": "",
+            "allowTargetBlank": true,
+            "multi": "paragraph,strong,em,hyperlink"
+          }
+        },
+        "experiences": {
+          "type": "Group",
+          "config": {
+            "label": "Experiences",
+            "repeat": true,
+            "fields": {
+              "company": {
+                "type": "Text",
+                "config": {
+                  "label": "Company",
+                  "placeholder": "Company name"
+                }
+              },
+              "position": {
+                "type": "Text",
+                "config": {
+                  "label": "Position",
+                  "placeholder": "Job title"
+                }
+              },
+              "location": {
+                "type": "Text",
+                "config": {
+                  "label": "Location",
+                  "placeholder": "City, State or Remote"
+                }
+              },
+              "start_date": {
+                "type": "Date",
+                "config": {
+                  "label": "Start Date",
+                  "placeholder": ""
+                }
+              },
+              "end_date": {
+                "type": "Date",
+                "config": {
+                  "label": "End Date",
+                  "placeholder": "Leave empty for current role"
+                }
+              },
+              "is_current": {
+                "type": "Boolean",
+                "config": {
+                  "label": "Is Current Role",
+                  "default_value": false,
+                  "placeholder_false": "No",
+                  "placeholder_true": "Yes"
+                }
+              },
+              "description": {
+                "type": "StructuredText",
+                "config": {
+                  "label": "Description",
+                  "placeholder": "Role description",
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,strong,em,hyperlink,list-item,o-list-item"
+                }
+              },
+              "achievements": {
+                "type": "StructuredText",
+                "config": {
+                  "label": "Achievements",
+                  "placeholder": "Key achievements",
+                  "allowTargetBlank": true,
+                  "multi": "paragraph,strong,em,hyperlink,list-item,o-list-item"
+                }
+              },
+              "technologies": {
+                "type": "Text",
+                "config": {
+                  "label": "Technologies",
+                  "placeholder": "Comma-separated: Python, React, AWS"
+                }
+              }
+            }
+          }
+        }
+      },
+      "items": {}
     }
   ]
 }
