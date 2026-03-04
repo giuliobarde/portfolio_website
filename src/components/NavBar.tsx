@@ -182,6 +182,28 @@ function NameLogo({ name, webIconUrl }: { name: KeyTextField; webIconUrl?: strin
   );
 }
 
+function VersionBadge({ currentVersion }: { currentVersion: "v3" | "v4" }) {
+  return (
+    <div className="flex items-center rounded-full bg-slate-200 p-0.5 text-xs font-bold">
+      {(["v3", "v4"] as const).map((v) => (
+        <a
+          key={v}
+          href={`/${v}`}
+          className={clsx(
+            "px-2.5 py-1 rounded-full transition-all duration-200 leading-none",
+            v === currentVersion
+              ? "bg-yellow-300 text-slate-900 shadow-sm"
+              : "text-slate-500 hover:text-slate-900",
+          )}
+          aria-current={v === currentVersion ? "page" : undefined}
+        >
+          {v}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 function DesktopMenu({
   settings,
   pathname,
@@ -211,6 +233,9 @@ function DesktopMenu({
             label={settings.data.resume_text}
             linkField={settings.data.resume_link}
           />
+      </li>
+      <li>
+        <VersionBadge currentVersion="v3" />
       </li>
     </div>
   );
@@ -292,6 +317,9 @@ function MobileMenu({
             linkField={settings.data.resume_link}
             className="w-full justify-center"
           />
+        </li>
+        <li className="px-4 py-3 flex justify-center">
+          <VersionBadge currentVersion="v3" />
         </li>
       </ul>
     </div>

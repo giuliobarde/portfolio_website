@@ -41,6 +41,7 @@ export default async function V4Layout({
   const settings = await client.getSingle("settings");
   const webIconUrl = settings.data.web_icon?.url ?? undefined;
   const userName = settings.data.name || undefined;
+  const version = (settings.data.version === "v3" ? "v3" : "v4") as "v3" | "v4";
 
-  return <V4LayoutWrapper webIconUrl={webIconUrl} userName={userName}>{children}</V4LayoutWrapper>;
+  return <V4LayoutWrapper webIconUrl={webIconUrl} userName={userName} version={version}>{children}</V4LayoutWrapper>;
 }

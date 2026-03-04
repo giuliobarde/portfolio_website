@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
+import { VersionToggle } from "./VersionToggle";
 
 const navItems = [
   { name: "about me", href: "#home" },
@@ -17,9 +18,10 @@ const navItems = [
 interface NavbarProps {
   userName?: string;
   webIconUrl?: string;
+  currentVersion?: "v3" | "v4";
 }
 
-export default function Navbar({ userName = "Portfolio", webIconUrl }: NavbarProps) {
+export default function Navbar({ userName = "Portfolio", webIconUrl, currentVersion = "v4" }: NavbarProps) {
   const [activeSection, setActiveSection] = React.useState("home");
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
@@ -184,6 +186,7 @@ export default function Navbar({ userName = "Portfolio", webIconUrl }: NavbarPro
 
             {/* Right side */}
             <div className="flex items-center space-x-3">
+              <VersionToggle currentVersion={currentVersion} />
               <ThemeToggle />
               <button
                 className="md:hidden p-1.5 rounded border border-border hover:border-accent/30 hover:bg-accent/10 transition-all font-mono text-xs"
@@ -215,6 +218,7 @@ export default function Navbar({ userName = "Portfolio", webIconUrl }: NavbarPro
             className="fixed inset-0 z-40 bg-background/95 backdrop-blur-md md:hidden"
           >
             <div className="flex flex-col items-center justify-center h-full gap-6">
+              <VersionToggle currentVersion={currentVersion} />
               {navItems.map((item, index) => (
                 <motion.a
                   key={item.name}

@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
+import { createClient } from "@/prismicio";
 
-export default function Page() {
-  redirect("/v3");
+export default async function Page() {
+  const client = createClient();
+  const settings = await client.getSingle("settings");
+  const version = settings.data.version;
+
+  redirect(version === "v4" ? "/v4" : "/v3");
 }
