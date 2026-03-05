@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Content,
@@ -61,19 +61,19 @@ const V4ProjectModal: React.FC<V4ProjectModalProps> = ({
 
   const hasNavigation = projectList.length > 1 && onNavigate;
 
-  const handlePrevProject = () => {
+  const handlePrevProject = useCallback(() => {
     if (!hasNavigation) return;
     setSlideDirection("left");
     const newIndex = (currentProjectIndex - 1 + projectList.length) % projectList.length;
     onNavigate(newIndex);
-  };
+  }, [hasNavigation, currentProjectIndex, projectList.length, onNavigate]);
 
-  const handleNextProject = () => {
+  const handleNextProject = useCallback(() => {
     if (!hasNavigation) return;
     setSlideDirection("right");
     const newIndex = (currentProjectIndex + 1) % projectList.length;
     onNavigate(newIndex);
-  };
+  }, [hasNavigation, currentProjectIndex, projectList.length, onNavigate]);
 
   const getWebsiteUrl = (): string | null => {
     if (!Array.isArray(project.project_link) || project.project_link.length === 0)
@@ -142,7 +142,7 @@ const V4ProjectModal: React.FC<V4ProjectModalProps> = ({
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, hasNavigation, currentProjectIndex]);
+  }, [onClose, hasNavigation, handlePrevProject, handleNextProject]);
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).id === "v4-modal-overlay") onClose();
