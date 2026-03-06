@@ -11,6 +11,12 @@
         "fieldset": "Slice Zone",
         "config": {
           "choices": {
+            "work_experience": {
+              "type": "SharedSlice"
+            },
+            "education": {
+              "type": "SharedSlice"
+            },
             "projects": {
               "type": "SharedSlice"
             },
@@ -21,9 +27,6 @@
               "type": "SharedSlice"
             },
             "hero": {
-              "type": "SharedSlice"
-            },
-            "education": {
               "type": "SharedSlice"
             }
           }

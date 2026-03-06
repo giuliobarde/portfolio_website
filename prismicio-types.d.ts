@@ -5,12 +5,12 @@ import type * as prismic from "@prismicio/client";
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] };
 
 type HomepageDocumentDataSlicesSlice =
+  | WorkExperienceSlice
+  | EducationSlice
   | ProjectsSlice
   | TechListSlice
   | BiographySlice
-  | HeroSlice
-  | EducationSlice
-  | WorkExperienceSlice;
+  | HeroSlice;
 
 /**
  * Content for Homepage documents
@@ -1073,6 +1073,149 @@ export type TechListSlice = prismic.SharedSlice<
 >;
 
 /**
+ * Item in *WorkExperience → Default → Primary → Experiences*
+ */
+export interface WorkExperienceSliceDefaultPrimaryExperiencesItem {
+  /**
+   * Company field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: Company name
+   * - **API ID Path**: work_experience.default.primary.experiences[].company
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  company: prismic.KeyTextField;
+
+  /**
+   * Position field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: Job title
+   * - **API ID Path**: work_experience.default.primary.experiences[].position
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  position: prismic.KeyTextField;
+
+  /**
+   * Location field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: City, State or Remote
+   * - **API ID Path**: work_experience.default.primary.experiences[].location
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  location: prismic.KeyTextField;
+
+  /**
+   * Start Date field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Date
+   * - **Placeholder**: *None*
+   * - **API ID Path**: work_experience.default.primary.experiences[].start_date
+   * - **Documentation**: https://prismic.io/docs/field#date
+   */
+  start_date: prismic.DateField;
+
+  /**
+   * End Date field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Date
+   * - **Placeholder**: Leave empty for current role
+   * - **API ID Path**: work_experience.default.primary.experiences[].end_date
+   * - **Documentation**: https://prismic.io/docs/field#date
+   */
+  end_date: prismic.DateField;
+
+  /**
+   * Is Current Role field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Boolean
+   * - **Placeholder**: *None*
+   * - **Default Value**: false
+   * - **API ID Path**: work_experience.default.primary.experiences[].is_current
+   * - **Documentation**: https://prismic.io/docs/field#boolean
+   */
+  is_current: prismic.BooleanField;
+
+  /**
+   * Description field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: Role description
+   * - **API ID Path**: work_experience.default.primary.experiences[].description
+   * - **Documentation**: https://prismic.io/docs/field#rich-text-title
+   */
+  description: prismic.RichTextField;
+
+  /**
+   * Achievements field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: Key achievements
+   * - **API ID Path**: work_experience.default.primary.experiences[].achievements
+   * - **Documentation**: https://prismic.io/docs/field#rich-text-title
+   */
+  achievements: prismic.RichTextField;
+
+  /**
+   * Technologies field in *WorkExperience → Default → Primary → Experiences*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: Comma-separated: Python, React, AWS
+   * - **API ID Path**: work_experience.default.primary.experiences[].technologies
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  technologies: prismic.KeyTextField;
+}
+
+/**
+ * Primary content in *WorkExperience → Default → Primary*
+ */
+export interface WorkExperienceSliceDefaultPrimary {
+  /**
+   * Section ID field in *WorkExperience → Default → Primary*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: work
+   * - **API ID Path**: work_experience.default.primary.section_id
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  section_id: prismic.KeyTextField;
+
+  /**
+   * Heading field in *WorkExperience → Default → Primary*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: Work Experience
+   * - **API ID Path**: work_experience.default.primary.heading
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  heading: prismic.KeyTextField;
+
+  /**
+   * Description field in *WorkExperience → Default → Primary*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: work_experience.default.primary.description
+   * - **Documentation**: https://prismic.io/docs/field#rich-text-title
+   */
+  description: prismic.RichTextField;
+
+  /**
+   * Experiences field in *WorkExperience → Default → Primary*
+   *
+   * - **Field Type**: Group
+   * - **Placeholder**: *None*
+   * - **API ID Path**: work_experience.default.primary.experiences[]
+   * - **Documentation**: https://prismic.io/docs/field#group
+   */
+  experiences: prismic.GroupField<
+    Simplify<WorkExperienceSliceDefaultPrimaryExperiencesItem>
+  >;
+}
+
+/**
  * Default variation for WorkExperience Slice
  *
  * - **API ID**: `default`
@@ -1081,7 +1224,7 @@ export type TechListSlice = prismic.SharedSlice<
  */
 export type WorkExperienceSliceDefault = prismic.SharedSliceVariation<
   "default",
-  Record<string, never>,
+  Simplify<WorkExperienceSliceDefaultPrimary>,
   never
 >;
 
@@ -1158,6 +1301,8 @@ declare module "@prismicio/client" {
       TechListSliceVariation,
       TechListSliceDefault,
       WorkExperienceSlice,
+      WorkExperienceSliceDefaultPrimaryExperiencesItem,
+      WorkExperienceSliceDefaultPrimary,
       WorkExperienceSliceVariation,
       WorkExperienceSliceDefault,
     };
