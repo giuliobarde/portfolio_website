@@ -9,9 +9,8 @@ import { VersionToggle } from "./VersionToggle";
 
 const navItems = [
   { name: "about me", href: "#home" },
-  { name: "education", href: "#education" },
+  { name: "timeline", href: "#timeline" },
   { name: "skills", href: "#skills" },
-  { name: "work", href: "#work" },
   { name: "projects", href: "#projects" },
 ];
 
