@@ -51,14 +51,21 @@ export interface TimelinePosition {
   widthPct: number;
 }
 
-export interface BranchLayout {
+export interface WorkJobEntry {
   work: WorkItem;
-  index: number; // original index in the work items array
-  laneIndex: number; // 0 = closest to main line
+  index: number;
+  startTs: number;
+  endTs: number;
   startPct: number;
   endPct: number;
-  midPct: number;
-  widthPct: number;
+}
+
+export interface WorkPeriod {
+  startTs: number;
+  endTs: number;
+  startPct: number;
+  endPct: number;
+  activeJobs: WorkJobEntry[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -189,20 +196,22 @@ export function computePositions(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Branch lane assignment (greedy algorithm)                          */
+/*  Work period computation (merge overlapping jobs into periods)       */
 /* ------------------------------------------------------------------ */
 
 /**
- * Assigns each work entry to a "lane" (0-based) for branching below
- * the main education line. Non-overlapping jobs reuse lanes;
- * concurrent jobs get separate lanes.
+ * Merges overlapping/adjacent work items into contiguous "work periods".
+ * Each period represents a time span where at least one job is active,
+ * and carries the list of all jobs active during that span.
  */
-export function computeBranchLanes(
+export function computeWorkPeriods(
   workItems: WorkItem[],
   range: TimelineRange,
   now: number,
-): BranchLayout[] {
-  // Create entries with timestamps and original indices
+): WorkPeriod[] {
+  if (workItems.length === 0) return [];
+
+  // Build entries with timestamps
   const entries = workItems.map((work, index) => {
     const startTs = parseDateTs(work.start_date) ?? range.start;
     const endTs = work.end_date
@@ -214,44 +223,44 @@ export function computeBranchLanes(
   // Sort by start time
   const sorted = [...entries].sort((a, b) => a.startTs - b.startTs);
 
-  // Greedy lane assignment
-  const laneEndTimes: number[] = []; // endTs of the last entry on each lane
+  // Merge overlapping intervals
+  const periods: Array<{
+    startTs: number;
+    endTs: number;
+    jobs: typeof sorted;
+  }> = [];
 
-  const layouts: BranchLayout[] = sorted.map((entry) => {
-    // Find lowest lane that's free (previous occupant ended before this starts)
-    let assignedLane = -1;
-    for (let i = 0; i < laneEndTimes.length; i++) {
-      if (laneEndTimes[i] <= entry.startTs) {
-        assignedLane = i;
-        break;
-      }
-    }
-
-    if (assignedLane === -1) {
-      // No free lane — create a new one
-      assignedLane = laneEndTimes.length;
-      laneEndTimes.push(entry.endTs);
+  for (const entry of sorted) {
+    const last = periods[periods.length - 1];
+    if (last && entry.startTs <= last.endTs) {
+      // Overlapping — extend period and add job
+      last.endTs = Math.max(last.endTs, entry.endTs);
+      last.jobs.push(entry);
     } else {
-      laneEndTimes[assignedLane] = entry.endTs;
+      // New period
+      periods.push({
+        startTs: entry.startTs,
+        endTs: entry.endTs,
+        jobs: [entry],
+      });
     }
+  }
 
-    const startPct = r(dateToPercent(entry.startTs, range));
-    const endPct = r(dateToPercent(entry.endTs, range));
-    const midPct = r((startPct + endPct) / 2);
-
-    return {
-      work: entry.work,
-      index: entry.index,
-      laneIndex: assignedLane,
-      startPct,
-      endPct,
-      midPct,
-      widthPct: r(endPct - startPct),
-    };
-  });
-
-  // Re-sort by original index for consistent rendering
-  return layouts.sort((a, b) => a.index - b.index);
+  // Convert to WorkPeriod with percentage positions
+  return periods.map((p) => ({
+    startTs: p.startTs,
+    endTs: p.endTs,
+    startPct: r(dateToPercent(p.startTs, range)),
+    endPct: r(dateToPercent(p.endTs, range)),
+    activeJobs: p.jobs.map((j) => ({
+      work: j.work,
+      index: j.index,
+      startTs: j.startTs,
+      endTs: j.endTs,
+      startPct: r(dateToPercent(j.startTs, range)),
+      endPct: r(dateToPercent(j.endTs, range)),
+    })),
+  }));
 }
 
 /* ------------------------------------------------------------------ */

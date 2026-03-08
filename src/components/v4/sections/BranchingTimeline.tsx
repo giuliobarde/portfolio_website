@@ -16,7 +16,7 @@ import {
   getTimelineRange,
   generateTimeMarkers,
   computePositions,
-  computeBranchLanes,
+  computeWorkPeriods,
   hasRichText,
 } from "@/lib/timeline-utils";
 
@@ -28,16 +28,12 @@ if (typeof window !== "undefined") {
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-/** Vertical offset (px) from main line center to lane 0 */
-const LANE_OFFSET = 60;
-/** Vertical spacing (px) between adjacent lanes */
-const LANE_SPACING = 80;
-/** Horizontal run (in percentage points) consumed by the 45° diagonal */
-const DIAGONAL_RUN_PCT = 1.2;
-
-function laneY(laneIndex: number): number {
-  return LANE_OFFSET + laneIndex * LANE_SPACING;
-}
+/** px below main line where the work branch runs */
+const BRANCH_Y_OFFSET = 90;
+/** px the track group shifts up to reveal the branch */
+const ZOOM_SHIFT_PX = 50;
+/** Horizontal % consumed by the 45° diagonal fork/merge */
+const DIAG_PCT = 1.5;
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -66,6 +62,7 @@ export default function BranchingTimeline({
   const pinContainerRef = useRef<HTMLDivElement>(null);
   const timelineContentRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
+  const trackGroupRef = useRef<HTMLDivElement>(null);
 
   // Education refs
   const eduCardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -74,16 +71,16 @@ export default function BranchingTimeline({
   const eduConnectorRefs = useRef<(HTMLDivElement | null)[]>([]);
   const eduSegmentRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Work refs
-  const workCardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const workDurationLabelRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const workConnectorRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const workSegmentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // Work refs (single branch)
   const branchPathRefs = useRef<(SVGPathElement | null)[]>([]);
+  const branchSegmentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const workCardRef = useRef<HTMLDivElement>(null);
+  const workCardConnectorRef = useRef<HTMLDivElement>(null);
+  const workJobEntryRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [isMobile, setIsMobile] = useState(false);
 
-  // Ref setters
+  // Education ref setters
   const setEduCardRef = useCallback((el: HTMLDivElement | null, i: number) => {
     eduCardRefs.current[i] = el;
   }, []);
@@ -108,30 +105,21 @@ export default function BranchingTimeline({
     },
     [],
   );
-  const setWorkCardRef = useCallback((el: HTMLDivElement | null, i: number) => {
-    workCardRefs.current[i] = el;
-  }, []);
-  const setWorkDurationLabelRef = useCallback(
-    (el: HTMLSpanElement | null, i: number) => {
-      workDurationLabelRefs.current[i] = el;
-    },
-    [],
-  );
-  const setWorkConnectorRef = useCallback(
-    (el: HTMLDivElement | null, i: number) => {
-      workConnectorRefs.current[i] = el;
-    },
-    [],
-  );
-  const setWorkSegmentRef = useCallback(
-    (el: HTMLDivElement | null, i: number) => {
-      workSegmentRefs.current[i] = el;
-    },
-    [],
-  );
   const setBranchPathRef = useCallback(
     (el: SVGPathElement | null, i: number) => {
       branchPathRefs.current[i] = el;
+    },
+    [],
+  );
+  const setBranchSegmentRef = useCallback(
+    (el: HTMLDivElement | null, i: number) => {
+      branchSegmentRefs.current[i] = el;
+    },
+    [],
+  );
+  const setWorkJobEntryRef = useCallback(
+    (el: HTMLDivElement | null, i: number) => {
+      workJobEntryRefs.current[i] = el;
     },
     [],
   );
@@ -156,13 +144,12 @@ export default function BranchingTimeline({
     const totalMonths = (range.end - range.start) / MS_PER_MONTH;
 
     const eduPositions = computePositions(educationItems, range, now);
-    const branches = computeBranchLanes(workItems, range, now);
-    const maxLane = branches.reduce(
-      (max, b) => Math.max(max, b.laneIndex),
-      -1,
-    );
+    const workPeriods = computeWorkPeriods(workItems, range, now);
 
-    return { range, markers, eduPositions, branches, totalMonths, maxLane, now };
+    // Flatten all individual jobs with their positions for the card
+    const allJobs = workPeriods.flatMap((p) => p.activeJobs);
+
+    return { range, markers, eduPositions, workPeriods, allJobs, totalMonths, now };
   }, [educationItems, workItems]);
 
   /* ---- Content width in vw ---- */
@@ -214,7 +201,7 @@ export default function BranchingTimeline({
           pinSpacing: true,
         });
 
-        // Slide content
+        // Slide content horizontally
         gsap.fromTo(
           contentEl,
           { x: center },
@@ -246,7 +233,7 @@ export default function BranchingTimeline({
 
         const GAP = 0.05;
 
-        /* ---- Education item animations ---- */
+        /* ---- Education item animations (same as original) ---- */
         timelineData.eduPositions.forEach((pos, index) => {
           const startFrac = pos.startPct / 100;
           const endFrac = pos.endPct / 100;
@@ -263,16 +250,10 @@ export default function BranchingTimeline({
               : Infinity;
 
           const rangeStart = Math.max(0, startFrac - buffer, prevEndFrac + GAP);
-          const rangeEnd = Math.min(
-            1,
-            endFrac + buffer,
-            nextStartFrac - GAP,
-          );
+          const rangeEnd = Math.min(1, endFrac + buffer, nextStartFrac - GAP);
           const totalRange = rangeEnd - rangeStart;
-          const appearPart =
-            Math.min(buffer, totalRange * 0.2) / totalRange;
-          const disappearPart =
-            Math.min(buffer, totalRange * 0.2) / totalRange;
+          const appearPart = Math.min(buffer, totalRange * 0.2) / totalRange;
+          const disappearPart = Math.min(buffer, totalRange * 0.2) / totalRange;
 
           // Segment fill
           const segment = eduSegmentRefs.current[index];
@@ -345,22 +326,12 @@ export default function BranchingTimeline({
             labelTl.fromTo(
               label,
               { opacity: 0, scale: 0.7 },
-              {
-                opacity: 1,
-                scale: 1,
-                duration: appearPart,
-                ease: "power2.out",
-              },
+              { opacity: 1, scale: 1, duration: appearPart, ease: "power2.out" },
               0,
             );
             labelTl.to(
               label,
-              {
-                opacity: 0,
-                scale: 0.7,
-                duration: disappearPart,
-                ease: "power2.in",
-              },
+              { opacity: 0, scale: 0.7, duration: disappearPart, ease: "power2.in" },
               1 - disappearPart,
             );
           }
@@ -379,22 +350,12 @@ export default function BranchingTimeline({
             connTl.fromTo(
               connector,
               { scaleY: 0, opacity: 0 },
-              {
-                scaleY: 1,
-                opacity: 1,
-                duration: appearPart,
-                ease: "power2.out",
-              },
+              { scaleY: 1, opacity: 1, duration: appearPart, ease: "power2.out" },
               0,
             );
             connTl.to(
               connector,
-              {
-                scaleY: 0,
-                opacity: 0,
-                duration: disappearPart,
-                ease: "power2.in",
-              },
+              { scaleY: 0, opacity: 0, duration: disappearPart, ease: "power2.in" },
               1 - disappearPart,
             );
           }
@@ -413,191 +374,213 @@ export default function BranchingTimeline({
             cardTl.fromTo(
               card,
               { opacity: 0, y: -50, scale: 0.85 },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: appearPart,
-                ease: "power3.out",
-              },
+              { opacity: 1, y: 0, scale: 1, duration: appearPart, ease: "power3.out" },
               0,
             );
             cardTl.to(
               card,
-              {
-                opacity: 0,
-                scale: 0.8,
-                duration: disappearPart,
-                ease: "power2.in",
-              },
+              { opacity: 0, scale: 0.8, duration: disappearPart, ease: "power2.in" },
               1 - disappearPart,
             );
           }
         });
 
-        /* ---- Work branch animations ---- */
-        timelineData.branches.forEach((branch, bIdx) => {
-          const startFrac = branch.startPct / 100;
-          const endFrac = branch.endPct / 100;
-          const periodLen = endFrac - startFrac;
-          const buffer = Math.min(0.06, periodLen * 0.25);
+        /* ---- Work branch animations (zoom + path + card) ---- */
 
-          // Diagonal starts slightly before the job period
-          const diagStartFrac = Math.max(
-            0,
-            startFrac - DIAGONAL_RUN_PCT / 100,
-          );
-          const diagEndFrac = Math.min(1, endFrac + DIAGONAL_RUN_PCT / 100);
+        // Initialize all work job entries as hidden
+        timelineData.allJobs.forEach((_, jIdx) => {
+          const entry = workJobEntryRefs.current[jIdx];
+          if (entry) {
+            gsap.set(entry, { opacity: 0, maxHeight: 0, overflow: "hidden", marginBottom: 0, paddingTop: 0, paddingBottom: 0 });
+          }
+        });
 
-          const rangeStart = Math.max(0, diagStartFrac - buffer);
-          const rangeEnd = Math.min(1, diagEndFrac + buffer);
-          const totalRange = rangeEnd - rangeStart;
-          const appearPart =
-            Math.min(buffer, totalRange * 0.2) / totalRange;
-          const disappearPart =
-            Math.min(buffer, totalRange * 0.2) / totalRange;
+        // Initialize work card as hidden
+        if (workCardRef.current) {
+          gsap.set(workCardRef.current, { opacity: 0, y: 30 });
+        }
+        if (workCardConnectorRef.current) {
+          gsap.set(workCardConnectorRef.current, { scaleY: 0, opacity: 0 });
+        }
 
-          // Branch SVG path draw
-          const path = branchPathRefs.current[bIdx];
+        timelineData.workPeriods.forEach((period, pIdx) => {
+          const periodStartFrac = period.startPct / 100;
+          const periodEndFrac = period.endPct / 100;
+
+          // --- Zoom/shift: animate track group up to reveal branch ---
+          const shiftInStart = Math.max(0, periodStartFrac - 0.03);
+          const shiftInEnd = periodStartFrac;
+          const shiftOutStart = periodEndFrac;
+          const shiftOutEnd = Math.min(1, periodEndFrac + 0.03);
+
+          if (trackGroupRef.current) {
+            // Shift UP
+            gsap.fromTo(
+              trackGroupRef.current,
+              { y: 0 },
+              {
+                y: -ZOOM_SHIFT_PX,
+                ease: "power2.inOut",
+                scrollTrigger: {
+                  trigger: section,
+                  start: `top+=${scrollEnd * shiftInStart} top`,
+                  end: `top+=${scrollEnd * shiftInEnd} top`,
+                  scrub: 0.5,
+                },
+              },
+            );
+
+            // Shift BACK
+            gsap.to(trackGroupRef.current, {
+              y: 0,
+              ease: "power2.inOut",
+              scrollTrigger: {
+                trigger: section,
+                start: `top+=${scrollEnd * shiftOutStart} top`,
+                end: `top+=${scrollEnd * shiftOutEnd} top`,
+                scrub: 0.5,
+              },
+            });
+          }
+
+          // --- Branch SVG path draw ---
+          const path = branchPathRefs.current[pIdx];
           if (path) {
             const pathLength = path.getTotalLength();
             gsap.set(path, {
               strokeDasharray: pathLength,
               strokeDashoffset: pathLength,
+              strokeOpacity: 0.5,
             });
             gsap.to(path, {
               strokeDashoffset: 0,
               ease: "none",
               scrollTrigger: {
                 trigger: section,
-                start: `top+=${scrollEnd * diagStartFrac} top`,
-                end: `top+=${scrollEnd * diagEndFrac} top`,
+                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.01)} top`,
+                end: `top+=${scrollEnd * periodEndFrac} top`,
                 scrub: 0.5,
               },
             });
           }
 
-          // Work segment fill (on the branch lane)
-          const segment = workSegmentRefs.current[bIdx];
-          if (segment) {
+          // --- Branch segment fill ---
+          const seg = branchSegmentRefs.current[pIdx];
+          if (seg) {
             gsap.fromTo(
-              segment,
-              { scaleX: 0 },
+              seg,
+              { scaleX: 0, opacity: 0 },
               {
                 scaleX: 1,
+                opacity: 1,
                 ease: "none",
                 scrollTrigger: {
                   trigger: section,
-                  start: `top+=${scrollEnd * startFrac} top`,
-                  end: `top+=${scrollEnd * endFrac} top`,
+                  start: `top+=${scrollEnd * periodStartFrac} top`,
+                  end: `top+=${scrollEnd * periodEndFrac} top`,
                   scrub: 0.5,
                 },
               },
             );
           }
 
-          // Work duration label
-          const label = workDurationLabelRefs.current[bIdx];
-          if (label) {
-            const labelTl = gsap.timeline({
+          // --- Work card show/hide ---
+          if (workCardRef.current) {
+            gsap.to(workCardRef.current, {
+              opacity: 1,
+              y: 0,
+              ease: "power2.out",
               scrollTrigger: {
                 trigger: section,
-                start: `top+=${scrollEnd * rangeStart} top`,
-                end: `top+=${scrollEnd * rangeEnd} top`,
-                scrub: 0.5,
+                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.02)} top`,
+                end: `top+=${scrollEnd * periodStartFrac} top`,
+                scrub: 0.3,
               },
             });
-            labelTl.fromTo(
-              label,
-              { opacity: 0, scale: 0.7 },
-              {
-                opacity: 1,
-                scale: 1,
-                duration: appearPart,
-                ease: "power2.out",
+            gsap.to(workCardRef.current, {
+              opacity: 0,
+              y: 20,
+              ease: "power2.in",
+              scrollTrigger: {
+                trigger: section,
+                start: `top+=${scrollEnd * periodEndFrac} top`,
+                end: `top+=${scrollEnd * Math.min(1, periodEndFrac + 0.02)} top`,
+                scrub: 0.3,
               },
-              0,
-            );
-            labelTl.to(
-              label,
-              {
-                opacity: 0,
-                scale: 0.7,
-                duration: disappearPart,
-                ease: "power2.in",
-              },
-              1 - disappearPart,
-            );
+            });
           }
 
-          // Work connector
-          const connector = workConnectorRefs.current[bIdx];
-          if (connector) {
-            const connTl = gsap.timeline({
+          // --- Work card connector show/hide ---
+          if (workCardConnectorRef.current) {
+            gsap.to(workCardConnectorRef.current, {
+              scaleY: 1,
+              opacity: 1,
+              ease: "power2.out",
               scrollTrigger: {
                 trigger: section,
-                start: `top+=${scrollEnd * rangeStart} top`,
-                end: `top+=${scrollEnd * rangeEnd} top`,
-                scrub: 0.5,
+                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.02)} top`,
+                end: `top+=${scrollEnd * periodStartFrac} top`,
+                scrub: 0.3,
               },
             });
-            connTl.fromTo(
-              connector,
-              { scaleY: 0, opacity: 0 },
-              {
-                scaleY: 1,
-                opacity: 1,
-                duration: appearPart,
-                ease: "power2.out",
+            gsap.to(workCardConnectorRef.current, {
+              scaleY: 0,
+              opacity: 0,
+              ease: "power2.in",
+              scrollTrigger: {
+                trigger: section,
+                start: `top+=${scrollEnd * periodEndFrac} top`,
+                end: `top+=${scrollEnd * Math.min(1, periodEndFrac + 0.02)} top`,
+                scrub: 0.3,
               },
-              0,
-            );
-            connTl.to(
-              connector,
-              {
-                scaleY: 0,
-                opacity: 0,
-                duration: disappearPart,
-                ease: "power2.in",
-              },
-              1 - disappearPart,
-            );
+            });
           }
 
-          // Work card (enters from below)
-          const card = workCardRefs.current[bIdx];
-          if (card) {
-            const cardTl = gsap.timeline({
+          // --- Per-job entry visibility ---
+          period.activeJobs.forEach((job) => {
+            // Find the index in allJobs for correct ref
+            const jIdx = timelineData.allJobs.findIndex(
+              (j) => j.index === job.index,
+            );
+            if (jIdx === -1) return;
+            const entry = workJobEntryRefs.current[jIdx];
+            if (!entry) return;
+
+            const jobStartFrac = job.startPct / 100;
+            const jobEndFrac = job.endPct / 100;
+
+            // Fade in
+            gsap.to(entry, {
+              opacity: 1,
+              maxHeight: 200,
+              marginBottom: 12,
+              paddingTop: 4,
+              paddingBottom: 4,
+              ease: "power2.out",
               scrollTrigger: {
                 trigger: section,
-                start: `top+=${scrollEnd * rangeStart} top`,
-                end: `top+=${scrollEnd * rangeEnd} top`,
-                scrub: 0.8,
+                start: `top+=${scrollEnd * Math.max(0, jobStartFrac - 0.01)} top`,
+                end: `top+=${scrollEnd * jobStartFrac} top`,
+                scrub: 0.3,
               },
             });
-            cardTl.fromTo(
-              card,
-              { opacity: 0, y: 50, scale: 0.85 },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: appearPart,
-                ease: "power3.out",
+
+            // Fade out
+            gsap.to(entry, {
+              opacity: 0,
+              maxHeight: 0,
+              marginBottom: 0,
+              paddingTop: 0,
+              paddingBottom: 0,
+              ease: "power2.in",
+              scrollTrigger: {
+                trigger: section,
+                start: `top+=${scrollEnd * jobEndFrac} top`,
+                end: `top+=${scrollEnd * Math.min(1, jobEndFrac + 0.01)} top`,
+                scrub: 0.3,
               },
-              0,
-            );
-            cardTl.to(
-              card,
-              {
-                opacity: 0,
-                scale: 0.8,
-                duration: disappearPart,
-                ease: "power2.in",
-              },
-              1 - disappearPart,
-            );
-          }
+            });
+          });
         });
       }, sectionRef);
 
@@ -620,7 +603,7 @@ export default function BranchingTimeline({
       .filter(Boolean);
   };
 
-  // Merge and sort all entries chronologically (most recent first) — for mobile
+  // Mobile: merge + sort all entries chronologically (most recent first)
   const allEntries = useMemo(() => {
     const entries: Array<{
       type: "education" | "work";
@@ -628,7 +611,6 @@ export default function BranchingTimeline({
       education?: EducationItem;
       work?: WorkItem;
     }> = [];
-
     for (const edu of educationItems) {
       const ts = parseDateTs(edu.start_date) ?? 0;
       entries.push({ type: "education", sortTs: ts, education: edu });
@@ -637,18 +619,14 @@ export default function BranchingTimeline({
       const ts = parseDateTs(work.start_date) ?? 0;
       entries.push({ type: "work", sortTs: ts, work });
     }
-
     return entries.sort((a, b) => b.sortTs - a.sortTs);
   }, [educationItems, workItems]);
 
   /* ================================================================ */
-  /*  Desktop: Immersive branching timeline                            */
+  /*  Desktop: Immersive two-track branching timeline                   */
   /* ================================================================ */
   if (!isMobile && timelineData) {
-    const { markers, eduPositions, branches, maxLane } = timelineData;
-
-    // Compute total height needed for branches below the main line
-    const branchAreaHeight = maxLane >= 0 ? laneY(maxLane) + 40 : 0;
+    const { markers, eduPositions, workPeriods, allJobs } = timelineData;
 
     return (
       <section
@@ -694,10 +672,7 @@ export default function BranchingTimeline({
             {/* Fixed center playhead */}
             <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 z-40 pointer-events-none flex flex-col items-center">
               <div className="flex-1 w-px bg-gradient-to-b from-transparent via-accent/10 to-accent/25" />
-              <div
-                className="relative flex items-center justify-center"
-                style={{ marginTop: `-${branchAreaHeight / 2}px` }}
-              >
+              <div className="relative flex items-center justify-center">
                 <div className="w-3 h-3 rounded-full bg-accent shadow-[0_0_12px_3px] shadow-accent/30 z-10" />
                 <div
                   className="absolute w-6 h-6 rounded-full bg-accent/15 animate-ping"
@@ -707,145 +682,152 @@ export default function BranchingTimeline({
               <div className="flex-1 w-px bg-gradient-to-t from-transparent via-accent/10 to-accent/25" />
             </div>
 
-            {/* Sliding content */}
+            {/* Sliding content (moves with scroll) */}
             <div
               ref={timelineContentRef}
               className="absolute top-0 bottom-0 left-0 will-change-transform"
               style={{ width: `${contentWidthVW}vw` }}
             >
-              {/* Main track area — positioned with room for branches below */}
+              {/* Track group — shifts vertically for zoom effect */}
               <div
-                className="absolute left-0 right-0"
-                style={{
-                  top: `calc(50% - ${branchAreaHeight / 2}px)`,
-                }}
+                ref={trackGroupRef}
+                className="absolute left-0 right-0 will-change-transform"
+                style={{ top: "50%" }}
               >
-                {/* Background main track line */}
-                <div className="h-[2px] w-full bg-border/20 rounded-full" />
+                {/* === MAIN EDUCATION TRACK === */}
+                <div className="absolute left-0 right-0 top-0">
+                  {/* Background track line */}
+                  <div className="h-[2px] w-full bg-border/20 rounded-full" />
 
-                {/* Education highlighted segments */}
-                {educationItems.map((_, index) => {
-                  const pos = eduPositions[index];
-                  return (
+                  {/* Education highlighted segments */}
+                  {educationItems.map((_, index) => {
+                    const pos = eduPositions[index];
+                    return (
+                      <div
+                        key={`edu-seg-${index}`}
+                        ref={(el) => setEduSegmentRef(el, index)}
+                        className="absolute top-0 h-[2px] bg-accent rounded-full origin-left shadow-[0_0_6px_1px] shadow-accent/40"
+                        style={{
+                          left: `${pos.startPct}%`,
+                          width: `${pos.widthPct}%`,
+                          transform: "scaleX(0)",
+                        }}
+                      />
+                    );
+                  })}
+
+                  {/* Year labels above */}
+                  {markers.years.map((yr) => (
                     <div
-                      key={`edu-seg-${index}`}
-                      ref={(el) => setEduSegmentRef(el, index)}
-                      className="absolute top-0 h-[2px] bg-accent rounded-full origin-left shadow-[0_0_6px_1px] shadow-accent/40"
-                      style={{
-                        left: `${pos.startPct}%`,
-                        width: `${pos.widthPct}%`,
-                        transform: "scaleX(0)",
-                      }}
-                    />
-                  );
-                })}
+                      key={yr.year}
+                      className="absolute -translate-x-1/2 flex flex-col items-center pointer-events-none"
+                      style={{ left: `${yr.percent}%`, top: "-20px" }}
+                    >
+                      <span className="font-mono text-[10px] text-muted-foreground/50 font-semibold select-none">
+                        {yr.year}
+                      </span>
+                      <div className="w-px h-[10px] bg-border/40" />
+                    </div>
+                  ))}
 
-                {/* Work branch highlighted segments (on their lanes) */}
-                {branches.map((branch, bIdx) => (
+                  {/* Month ticks */}
+                  {markers.months.map((mo, i) => (
+                    <div
+                      key={`mo-${i}`}
+                      className="absolute -translate-x-1/2 pointer-events-none"
+                      style={{ left: `${mo.percent}%`, top: "2px" }}
+                    >
+                      <div
+                        className={`w-px ${
+                          mo.month % 3 === 0
+                            ? "h-[6px] bg-border/25"
+                            : "h-[3px] bg-border/12"
+                        }`}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* === WORK BRANCH (single line below main) === */}
+
+                {/* Branch background track line */}
+                <div
+                  className="absolute left-0 right-0 h-[2px] bg-border/10 rounded-full"
+                  style={{ top: `${BRANCH_Y_OFFSET}px`, opacity: 0 }}
+                />
+
+                {/* Branch highlighted segments (one per work period) */}
+                {workPeriods.map((period, pIdx) => (
                   <div
-                    key={`work-seg-${bIdx}`}
-                    ref={(el) => setWorkSegmentRef(el, bIdx)}
-                    className="absolute h-[2px] rounded-full origin-left shadow-[0_0_6px_1px]"
+                    key={`branch-seg-${pIdx}`}
+                    ref={(el) => setBranchSegmentRef(el, pIdx)}
+                    className="absolute h-[2px] rounded-full origin-left"
                     style={{
-                      left: `${branch.startPct}%`,
-                      width: `${branch.widthPct}%`,
-                      top: `${laneY(branch.laneIndex)}px`,
+                      left: `${period.startPct}%`,
+                      width: `${period.endPct - period.startPct}%`,
+                      top: `${BRANCH_Y_OFFSET}px`,
                       transform: "scaleX(0)",
+                      opacity: 0,
                       backgroundColor: "hsl(var(--cyan))",
                       boxShadow: "0 0 6px 1px hsl(var(--cyan) / 0.4)",
                     }}
                   />
                 ))}
 
-                {/* SVG branch paths (diagonal + parallel + diagonal) */}
+                {/* SVG branch paths (fork → parallel → merge) */}
                 <svg
-                  className="absolute inset-0 pointer-events-none overflow-visible"
-                  viewBox={`0 0 100 ${branchAreaHeight + 40}`}
+                  className="absolute left-0 right-0 pointer-events-none overflow-visible"
+                  viewBox={`0 0 100 ${BRANCH_Y_OFFSET + 20}`}
                   preserveAspectRatio="none"
                   style={{
                     width: "100%",
-                    height: `${branchAreaHeight + 40}px`,
+                    height: `${BRANCH_Y_OFFSET + 20}px`,
                     top: 0,
                   }}
                 >
-                  {branches.map((branch, bIdx) => {
-                    // SVG viewBox is 0-100 on x-axis, mapping to percentages
-                    const diagRunPct = DIAGONAL_RUN_PCT;
-                    const x1 = branch.startPct;
-                    const x2 = branch.startPct + diagRunPct;
-                    const x3 = Math.max(branch.endPct - diagRunPct, x2);
-                    const x4 = branch.endPct;
+                  {workPeriods.map((period, pIdx) => {
+                    const x1 = period.startPct;
+                    const x2 = period.startPct + DIAG_PCT;
+                    const x3 = Math.max(period.endPct - DIAG_PCT, x2);
+                    const x4 = period.endPct;
                     const mainY = 1;
-                    const branchY = laneY(branch.laneIndex);
-
+                    const branchY = BRANCH_Y_OFFSET;
                     const d = `M ${x1} ${mainY} L ${x2} ${branchY} L ${x3} ${branchY} L ${x4} ${mainY}`;
 
                     return (
                       <path
-                        key={`branch-path-${bIdx}`}
-                        ref={(el) => setBranchPathRef(el, bIdx)}
+                        key={`branch-path-${pIdx}`}
+                        ref={(el) => setBranchPathRef(el, pIdx)}
                         d={d}
                         fill="none"
                         stroke="hsl(var(--cyan))"
                         strokeWidth={2}
-                        strokeOpacity={0.5}
+                        strokeOpacity={0}
                         vectorEffect="non-scaling-stroke"
-                        className="branch-path"
                       />
                     );
                   })}
                 </svg>
 
-                {/* Year labels */}
-                {markers.years.map((yr) => (
-                  <div
-                    key={yr.year}
-                    className="absolute -translate-x-1/2 flex flex-col items-center pointer-events-none"
-                    style={{ left: `${yr.percent}%`, top: "-20px" }}
-                  >
-                    <span className="font-mono text-[10px] text-muted-foreground/50 font-semibold select-none">
-                      {yr.year}
-                    </span>
-                    <div className="w-px h-[10px] bg-border/40" />
-                  </div>
-                ))}
-
-                {/* Month ticks */}
-                {markers.months.map((mo, i) => (
-                  <div
-                    key={`mo-${i}`}
-                    className="absolute -translate-x-1/2 pointer-events-none"
-                    style={{ left: `${mo.percent}%`, top: "2px" }}
-                  >
+                {/* Education dots */}
+                {educationItems.map((_, index) => {
+                  const pos = eduPositions[index];
+                  return (
                     <div
-                      className={`w-px ${
-                        mo.month % 3 === 0
-                          ? "h-[6px] bg-border/25"
-                          : "h-[3px] bg-border/12"
-                      }`}
-                    />
-                  </div>
-                ))}
+                      key={`edu-dot-${index}`}
+                      ref={(el) => setEduDotRef(el, index)}
+                      className="absolute w-4 h-4 rounded-full border-2 border-accent bg-background z-20 opacity-0"
+                      style={{
+                        left: `${pos.startPct}%`,
+                        top: 0,
+                        transform: "translate(-50%, -50%)",
+                      }}
+                    >
+                      <div className="tl-dot-pulse absolute inset-[-6px] rounded-full bg-accent/40" />
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* Education dots (inside sliding container) */}
-              {educationItems.map((_, index) => {
-                const pos = eduPositions[index];
-                return (
-                  <div
-                    key={`edu-dot-${index}`}
-                    ref={(el) => setEduDotRef(el, index)}
-                    className="absolute w-4 h-4 rounded-full border-2 border-accent bg-background z-20 opacity-0"
-                    style={{
-                      left: `${pos.startPct}%`,
-                      top: `calc(50% - ${branchAreaHeight / 2}px)`,
-                      transform: "translate(-50%, -50%)",
-                    }}
-                  >
-                    <div className="tl-dot-pulse absolute inset-[-6px] rounded-full bg-accent/40" />
-                  </div>
-                );
-              })}
             </div>
 
             {/* Fixed card overlay (centered, NOT sliding) */}
@@ -855,16 +837,13 @@ export default function BranchingTimeline({
                 const duration = formatDuration(edu.start_date, edu.end_date);
                 const courses = parseCoursework(edu.coursework);
                 const schoolSlug =
-                  edu.school?.toLowerCase().replace(/\s+/g, "-") ||
-                  "university";
+                  edu.school?.toLowerCase().replace(/\s+/g, "-") || "university";
 
                 return (
                   <div
                     key={`edu-card-${index}`}
                     className="absolute left-1/2 -translate-x-1/2"
-                    style={{
-                      top: `calc(50% - ${branchAreaHeight / 2}px)`,
-                    }}
+                    style={{ top: "50%" }}
                   >
                     {/* Duration label */}
                     <span
@@ -912,24 +891,9 @@ export default function BranchingTimeline({
                               <span>{edu.school}</span>
                               {edu.location && (
                                 <span className="flex items-center gap-1">
-                                  <svg
-                                    className="w-3 h-3"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                   </svg>
                                   {edu.location}
                                 </span>
@@ -982,173 +946,103 @@ export default function BranchingTimeline({
                 );
               })}
 
-              {/* Work cards — below their branch lanes */}
-              {branches.map((branch, bIdx) => {
-                const work = branch.work;
-                const duration = formatDuration(
-                  work.start_date,
-                  work.end_date,
-                );
-                const companySlug =
-                  work.company?.toLowerCase().replace(/\s+/g, "-") ||
-                  "company";
-                const techTags = work.technologies
-                  ? work.technologies
-                      .split(",")
-                      .map((t) => t.trim())
-                      .filter(Boolean)
-                  : [];
+              {/* ONE work card — below the branch line */}
+              <div
+                className="absolute left-1/2 -translate-x-1/2"
+                style={{ top: `calc(50% + ${BRANCH_Y_OFFSET}px)` }}
+              >
+                {/* Connector from branch line to card */}
+                <div
+                  ref={workCardConnectorRef}
+                  className="absolute left-1/2 -translate-x-1/2 w-px top-[4px] h-[40px] origin-top"
+                  style={{
+                    backgroundColor: "hsl(var(--cyan) / 0.4)",
+                    transform: "translateX(-50%) scaleY(0)",
+                    opacity: 0,
+                  }}
+                />
 
-                return (
+                {/* Work card */}
+                <div
+                  ref={workCardRef}
+                  className="absolute left-1/2 -translate-x-1/2 top-[50px] pointer-events-auto"
+                  style={{
+                    width: "clamp(340px, 28vw, 460px)",
+                    opacity: 0,
+                  }}
+                >
                   <div
-                    key={`work-card-${bIdx}`}
-                    className="absolute left-1/2 -translate-x-1/2"
-                    style={{
-                      top: `calc(50% - ${branchAreaHeight / 2}px + ${laneY(branch.laneIndex)}px)`,
-                    }}
+                    className="terminal-card overflow-hidden shadow-xl shadow-black/15"
+                    style={{ borderColor: "hsl(var(--cyan) / 0.2)" }}
                   >
-                    {/* Duration label — below branch line */}
-                    <span
-                      ref={(el) => setWorkDurationLabelRef(el, bIdx)}
-                      className="absolute left-1/2 -translate-x-1/2 top-[12px] font-mono text-[11px] font-semibold whitespace-nowrap px-2.5 py-1 rounded-full border opacity-0"
-                      style={{
-                        color: "hsl(var(--cyan))",
-                        backgroundColor: "hsl(var(--cyan) / 0.1)",
-                        borderColor: "hsl(var(--cyan) / 0.2)",
-                      }}
-                    >
-                      {duration}
-                    </span>
-
-                    {/* Connector down to card */}
-                    <div
-                      ref={(el) => setWorkConnectorRef(el, bIdx)}
-                      className="absolute left-1/2 -translate-x-1/2 w-px top-[8px] h-[50px] origin-top opacity-0"
-                      style={{
-                        backgroundColor: "hsl(var(--cyan) / 0.4)",
-                        transform: "translateX(-50%) scaleY(0)",
-                      }}
-                    />
-
-                    {/* Terminal card */}
-                    <div
-                      ref={(el) => setWorkCardRef(el, bIdx)}
-                      className="absolute left-1/2 -translate-x-1/2 top-[66px] opacity-0 pointer-events-auto"
-                      style={{ width: "clamp(360px, 30vw, 500px)" }}
-                    >
-                      <div
-                        className="terminal-card overflow-hidden shadow-xl shadow-black/15"
-                        style={{
-                          borderColor: "hsl(var(--cyan) / 0.2)",
-                        }}
-                      >
-                        <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50 bg-muted/30">
-                          <div className="flex gap-1">
-                            <div className="w-2 h-2 rounded-full bg-red-500/60" />
-                            <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
-                            <div
-                              className={`w-2 h-2 rounded-full ${
-                                work.is_current
-                                  ? "bg-green-500 animate-pulse"
-                                  : "bg-green-500/60"
-                              }`}
-                            />
-                          </div>
-                          <span className="font-mono text-[10px] text-muted-foreground">
-                            {companySlug}.dev
-                          </span>
-                          {work.is_current && (
-                            <span
-                              className="ml-auto font-mono text-[9px] px-1.5 py-0.5 rounded"
-                              style={{
-                                color: "hsl(var(--cyan))",
-                                backgroundColor: "hsl(var(--cyan) / 0.1)",
-                              }}
-                            >
-                              ACTIVE
-                            </span>
-                          )}
-                        </div>
-                        <div className="p-5 space-y-3">
-                          <div>
-                            <h3 className="font-mono text-base font-bold text-foreground leading-tight">
-                              {work.position}
-                            </h3>
+                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50 bg-muted/30">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 rounded-full bg-red-500/60" />
+                        <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
+                        <div className="w-2 h-2 rounded-full bg-green-500/60 animate-pulse" />
+                      </div>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        work-experience.dev
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      {/* All job entries — GSAP controls individual visibility */}
+                      {allJobs.map((job, jIdx) => {
+                        const techTags = job.work.technologies
+                          ? job.work.technologies.split(",").map((t) => t.trim()).filter(Boolean)
+                          : [];
+                        return (
+                          <div
+                            key={`job-${jIdx}`}
+                            ref={(el) => setWorkJobEntryRef(el, jIdx)}
+                            className="border-l-2 pl-3 overflow-hidden"
+                            style={{
+                              borderColor: "hsl(var(--cyan) / 0.3)",
+                              opacity: 0,
+                              maxHeight: 0,
+                            }}
+                          >
+                            <h4 className="font-mono text-sm font-bold text-foreground">
+                              {job.work.position}
+                            </h4>
                             <p
                               className="font-mono text-xs mt-0.5"
                               style={{ color: "hsl(var(--cyan))" }}
                             >
-                              @ {work.company}
+                              @ {job.work.company}
                             </p>
-                            {work.location && (
-                              <div className="flex items-center gap-1 mt-1 font-mono text-[11px] text-muted-foreground">
-                                <svg
-                                  className="w-3 h-3"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                  />
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                  />
-                                </svg>
-                                {work.location}
+                            <span className="font-mono text-[10px] text-muted-foreground">
+                              {formatDuration(job.work.start_date, job.work.end_date)}
+                            </span>
+                            {job.work.location && (
+                              <span className="font-mono text-[10px] text-muted-foreground ml-2">
+                                · {job.work.location}
+                              </span>
+                            )}
+                            {techTags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1.5">
+                                {techTags.slice(0, 5).map((tech) => (
+                                  <span
+                                    key={tech}
+                                    className="px-1.5 py-0.5 rounded font-mono text-[9px] border"
+                                    style={{
+                                      color: "hsl(var(--cyan))",
+                                      backgroundColor: "hsl(var(--cyan) / 0.1)",
+                                      borderColor: "hsl(var(--cyan) / 0.2)",
+                                    }}
+                                  >
+                                    {tech}
+                                  </span>
+                                ))}
                               </div>
                             )}
                           </div>
-                          {hasRichText(work.description) && (
-                            <div className="text-xs font-mono text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
-                              <PrismicRichText field={work.description} />
-                            </div>
-                          )}
-                          {hasRichText(work.achievements) && (
-                            <div className="p-3 rounded bg-muted/30 border border-border/30">
-                              <div
-                                className="font-mono text-[10px] mb-1.5"
-                                style={{
-                                  color: "hsl(var(--cyan) / 0.6)",
-                                }}
-                              >
-                                # key achievements
-                              </div>
-                              <div className="text-xs font-mono prose prose-sm dark:prose-invert max-w-none prose-li:text-muted-foreground">
-                                <PrismicRichText field={work.achievements} />
-                              </div>
-                            </div>
-                          )}
-                          {techTags.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {techTags.map((tech) => (
-                                <span
-                                  key={tech}
-                                  className="px-1.5 py-0.5 rounded font-mono text-[10px] border"
-                                  style={{
-                                    color: "hsl(var(--cyan))",
-                                    backgroundColor:
-                                      "hsl(var(--cyan) / 0.1)",
-                                    borderColor: "hsl(var(--cyan) / 0.2)",
-                                  }}
-                                >
-                                  {tech}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                        );
+                      })}
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              </div>
             </div>
 
             {/* Scroll hint */}
@@ -1220,21 +1114,14 @@ export default function BranchingTimeline({
               const work = entry.work;
 
               const title = isEdu ? edu?.degree : work?.position;
-              const subtitle = isEdu
-                ? edu?.field_of_study
-                : `@ ${work?.company}`;
-              const place = isEdu ? edu?.school : work?.company;
+              const subtitle = isEdu ? edu?.field_of_study : `@ ${work?.company}`;
               const location = isEdu ? edu?.location : work?.location;
-              const startDate = isEdu
-                ? edu?.start_date
-                : work?.start_date;
+              const startDate = isEdu ? edu?.start_date : work?.start_date;
               const endDate = isEdu ? edu?.end_date : work?.end_date;
               const duration = formatDuration(startDate, endDate);
               const slug = isEdu
-                ? edu?.school?.toLowerCase().replace(/\s+/g, "-") ||
-                  "university"
-                : work?.company?.toLowerCase().replace(/\s+/g, "-") ||
-                  "company";
+                ? edu?.school?.toLowerCase().replace(/\s+/g, "-") || "university"
+                : work?.company?.toLowerCase().replace(/\s+/g, "-") || "company";
               const terminalSuffix = isEdu ? ".edu" : ".dev";
 
               return (
@@ -1246,13 +1133,10 @@ export default function BranchingTimeline({
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="relative"
                 >
-                  {/* Dot */}
                   <div
                     className="absolute left-[-25px] top-[10px] w-[11px] h-[11px] rounded-full border-2 bg-background z-10"
                     style={{
-                      borderColor: isEdu
-                        ? "hsl(var(--accent))"
-                        : "hsl(var(--cyan))",
+                      borderColor: isEdu ? "hsl(var(--accent))" : "hsl(var(--cyan))",
                     }}
                   />
 
@@ -1270,18 +1154,13 @@ export default function BranchingTimeline({
                         />
                       </div>
                       <span className="font-mono text-[10px] text-muted-foreground">
-                        {slug}
-                        {terminalSuffix}
+                        {slug}{terminalSuffix}
                       </span>
                       <span
                         className="ml-auto font-mono text-[9px] px-1.5 py-0.5 rounded"
                         style={{
-                          color: isEdu
-                            ? "hsl(var(--accent))"
-                            : "hsl(var(--cyan))",
-                          backgroundColor: isEdu
-                            ? "hsl(var(--accent) / 0.1)"
-                            : "hsl(var(--cyan) / 0.1)",
+                          color: isEdu ? "hsl(var(--accent))" : "hsl(var(--cyan))",
+                          backgroundColor: isEdu ? "hsl(var(--accent) / 0.1)" : "hsl(var(--cyan) / 0.1)",
                         }}
                       >
                         {isEdu ? "EDU" : "WORK"}
@@ -1290,23 +1169,18 @@ export default function BranchingTimeline({
 
                     <div className="p-5 space-y-3">
                       <div>
-                        <h3 className="font-mono text-lg font-bold text-foreground">
-                          {title}
-                        </h3>
+                        <h3 className="font-mono text-lg font-bold text-foreground">{title}</h3>
                         {subtitle && (
                           <p
                             className="font-mono text-sm mt-0.5"
                             style={{
-                              color: isEdu
-                                ? "hsl(var(--accent))"
-                                : "hsl(var(--cyan))",
+                              color: isEdu ? "hsl(var(--accent))" : "hsl(var(--cyan))",
                             }}
                           >
                             {subtitle}
                           </p>
                         )}
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 font-mono text-xs text-muted-foreground">
-                          {!isEdu && <span>{place}</span>}
                           {location && <span>{location}</span>}
                         </div>
                       </div>
@@ -1322,21 +1196,8 @@ export default function BranchingTimeline({
                             GPA: {edu.gpa}
                           </span>
                         )}
-                        {!isEdu && work?.is_current && (
-                          <span
-                            className="font-mono text-[10px] px-2.5 py-1 rounded font-semibold"
-                            style={{
-                              color: "hsl(var(--cyan))",
-                              backgroundColor: "hsl(var(--cyan) / 0.1)",
-                              borderColor: "hsl(var(--cyan) / 0.2)",
-                            }}
-                          >
-                            ACTIVE
-                          </span>
-                        )}
                       </div>
 
-                      {/* Education-specific */}
                       {isEdu && edu && (
                         <>
                           {hasRichText(edu.description) && (
@@ -1350,16 +1211,14 @@ export default function BranchingTimeline({
                                 # relevant coursework
                               </h4>
                               <div className="flex flex-wrap gap-1.5">
-                                {parseCoursework(edu.coursework).map(
-                                  (course) => (
-                                    <span
-                                      key={course}
-                                      className="px-2 py-0.5 rounded font-mono text-[11px] bg-card border border-border/50 text-foreground/80"
-                                    >
-                                      {course}
-                                    </span>
-                                  ),
-                                )}
+                                {parseCoursework(edu.coursework).map((course) => (
+                                  <span
+                                    key={course}
+                                    className="px-2 py-0.5 rounded font-mono text-[11px] bg-card border border-border/50 text-foreground/80"
+                                  >
+                                    {course}
+                                  </span>
+                                ))}
                               </div>
                             </div>
                           )}
@@ -1376,27 +1235,11 @@ export default function BranchingTimeline({
                         </>
                       )}
 
-                      {/* Work-specific */}
                       {!isEdu && work && (
                         <>
                           {hasRichText(work.description) && (
                             <div className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
                               <PrismicRichText field={work.description} />
-                            </div>
-                          )}
-                          {hasRichText(work.achievements) && (
-                            <div className="p-3 rounded bg-muted/30 border border-border/30">
-                              <div
-                                className="font-mono text-[10px] mb-1.5"
-                                style={{
-                                  color: "hsl(var(--cyan) / 0.6)",
-                                }}
-                              >
-                                # key achievements
-                              </div>
-                              <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-li:text-muted-foreground">
-                                <PrismicRichText field={work.achievements} />
-                              </div>
                             </div>
                           )}
                           {work.technologies && (
@@ -1411,10 +1254,8 @@ export default function BranchingTimeline({
                                     className="px-2 py-0.5 rounded font-mono text-[11px] border"
                                     style={{
                                       color: "hsl(var(--cyan))",
-                                      backgroundColor:
-                                        "hsl(var(--cyan) / 0.1)",
-                                      borderColor:
-                                        "hsl(var(--cyan) / 0.2)",
+                                      backgroundColor: "hsl(var(--cyan) / 0.1)",
+                                      borderColor: "hsl(var(--cyan) / 0.2)",
                                     }}
                                   >
                                     {tech}
