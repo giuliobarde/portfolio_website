@@ -73,7 +73,6 @@ export default function BranchingTimeline({
 
   // Work refs (single branch)
   const branchPathRefs = useRef<(SVGPathElement | null)[]>([]);
-  const branchSegmentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const workCardRef = useRef<HTMLDivElement>(null);
   const workCardConnectorRef = useRef<HTMLDivElement>(null);
   const workJobEntryRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -105,15 +104,16 @@ export default function BranchingTimeline({
     },
     [],
   );
+  const clipRectRefs = useRef<(SVGRectElement | null)[]>([]);
   const setBranchPathRef = useCallback(
     (el: SVGPathElement | null, i: number) => {
       branchPathRefs.current[i] = el;
     },
     [],
   );
-  const setBranchSegmentRef = useCallback(
-    (el: HTMLDivElement | null, i: number) => {
-      branchSegmentRefs.current[i] = el;
+  const setClipRectRef = useCallback(
+    (el: SVGRectElement | null, i: number) => {
+      clipRectRefs.current[i] = el;
     },
     [],
   );
@@ -443,36 +443,18 @@ export default function BranchingTimeline({
             });
           }
 
-          // --- Branch SVG path draw ---
+          // --- Branch SVG path reveal (clip-path sweep) ---
           const path = branchPathRefs.current[pIdx];
           if (path) {
-            const pathLength = path.getTotalLength();
-            gsap.set(path, {
-              strokeDasharray: pathLength,
-              strokeDashoffset: pathLength,
-              strokeOpacity: 0.5,
-            });
-            gsap.to(path, {
-              strokeDashoffset: 0,
-              ease: "none",
-              scrollTrigger: {
-                trigger: section,
-                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.01)} top`,
-                end: `top+=${scrollEnd * periodEndFrac} top`,
-                scrub: 0.5,
-              },
-            });
+            gsap.set(path, { strokeOpacity: 0.5 });
           }
-
-          // --- Branch segment fill ---
-          const seg = branchSegmentRefs.current[pIdx];
-          if (seg) {
+          const clipRect = clipRectRefs.current[pIdx];
+          if (clipRect) {
             gsap.fromTo(
-              seg,
-              { scaleX: 0, opacity: 0 },
+              clipRect,
+              { attr: { width: period.startPct } },
               {
-                scaleX: 1,
-                opacity: 1,
+                attr: { width: period.endPct },
                 ease: "none",
                 scrollTrigger: {
                   trigger: section,
@@ -750,30 +732,6 @@ export default function BranchingTimeline({
 
                 {/* === WORK BRANCH (single line below main) === */}
 
-                {/* Branch background track line */}
-                <div
-                  className="absolute left-0 right-0 h-[2px] bg-border/10 rounded-full"
-                  style={{ top: `${BRANCH_Y_OFFSET}px`, opacity: 0 }}
-                />
-
-                {/* Branch highlighted segments (one per work period) */}
-                {workPeriods.map((period, pIdx) => (
-                  <div
-                    key={`branch-seg-${pIdx}`}
-                    ref={(el) => setBranchSegmentRef(el, pIdx)}
-                    className="absolute h-[2px] rounded-full origin-left"
-                    style={{
-                      left: `${period.startPct}%`,
-                      width: `${period.endPct - period.startPct}%`,
-                      top: `${BRANCH_Y_OFFSET}px`,
-                      transform: "scaleX(0)",
-                      opacity: 0,
-                      backgroundColor: "hsl(var(--cyan))",
-                      boxShadow: "0 0 6px 1px hsl(var(--cyan) / 0.4)",
-                    }}
-                  />
-                ))}
-
                 {/* SVG branch paths (fork → parallel → merge) */}
                 <svg
                   className="absolute left-0 right-0 pointer-events-none overflow-visible"
@@ -785,6 +743,19 @@ export default function BranchingTimeline({
                     top: 0,
                   }}
                 >
+                  <defs>
+                    {workPeriods.map((period, pIdx) => (
+                      <clipPath key={`clip-${pIdx}`} id={`branch-clip-${pIdx}`}>
+                        <rect
+                          ref={(el) => setClipRectRef(el, pIdx)}
+                          x={0}
+                          y={0}
+                          width={period.startPct}
+                          height={BRANCH_Y_OFFSET + 20}
+                        />
+                      </clipPath>
+                    ))}
+                  </defs>
                   {workPeriods.map((period, pIdx) => {
                     const x1 = period.startPct;
                     const x2 = period.startPct + DIAG_PCT;
@@ -804,6 +775,7 @@ export default function BranchingTimeline({
                         strokeWidth={2}
                         strokeOpacity={0}
                         vectorEffect="non-scaling-stroke"
+                        clipPath={`url(#branch-clip-${pIdx})`}
                       />
                     );
                   })}
