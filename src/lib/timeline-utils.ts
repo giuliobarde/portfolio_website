@@ -65,6 +65,7 @@ export interface WorkPeriod {
   endTs: number;
   startPct: number;
   endPct: number;
+  isOngoing: boolean;
   activeJobs: WorkJobEntry[];
 }
 
@@ -252,6 +253,7 @@ export function computeWorkPeriods(
     endTs: p.endTs,
     startPct: r(dateToPercent(p.startTs, range)),
     endPct: r(dateToPercent(p.endTs, range)),
+    isOngoing: p.jobs.some((j) => j.work.is_current || !j.work.end_date),
     activeJobs: p.jobs.map((j) => ({
       work: j.work,
       index: j.index,

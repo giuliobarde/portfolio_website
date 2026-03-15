@@ -32,8 +32,8 @@ if (typeof window !== "undefined") {
 const BRANCH_Y_OFFSET = 90;
 /** px the track group shifts up to reveal the branch */
 const ZOOM_SHIFT_PX = 50;
-/** Horizontal % consumed by the 45° diagonal fork/merge */
-const DIAG_PCT = 1.5;
+/** Horizontal % consumed by the smooth fork/merge curves */
+const DIAG_PCT = 3;
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -117,6 +117,13 @@ export default function BranchingTimeline({
     },
     [],
   );
+  const workDotRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const setWorkDotRef = useCallback(
+    (el: HTMLDivElement | null, i: number) => {
+      workDotRefs.current[i] = el;
+    },
+    [],
+  );
   const setWorkJobEntryRef = useCallback(
     (el: HTMLDivElement | null, i: number) => {
       workJobEntryRefs.current[i] = el;
@@ -149,7 +156,15 @@ export default function BranchingTimeline({
     // Flatten all individual jobs with their positions for the card
     const allJobs = workPeriods.flatMap((p) => p.activeJobs);
 
-    return { range, markers, eduPositions, workPeriods, allJobs, totalMonths, now };
+    // Per-job dot placement info: first job in each period goes on the main line
+    const jobDotInfo = workPeriods.flatMap((period) =>
+      period.activeJobs.map((_, localIdx) => ({
+        isFirstInPeriod: localIdx === 0,
+        periodStartPct: period.startPct,
+      })),
+    );
+
+    return { range, markers, eduPositions, workPeriods, allJobs, jobDotInfo, totalMonths, now };
   }, [educationItems, workItems]);
 
   /* ---- Content width in vw ---- */
@@ -420,34 +435,32 @@ export default function BranchingTimeline({
               { y: 0 },
               {
                 y: -ZOOM_SHIFT_PX,
-                ease: "power2.inOut",
+                ease: "power3.inOut",
                 scrollTrigger: {
                   trigger: section,
                   start: `top+=${scrollEnd * shiftInStart} top`,
                   end: `top+=${scrollEnd * shiftInEnd} top`,
-                  scrub: 0.5,
+                  scrub: 0.8,
                 },
               },
             );
 
-            // Shift BACK
-            gsap.to(trackGroupRef.current, {
-              y: 0,
-              ease: "power2.inOut",
-              scrollTrigger: {
-                trigger: section,
-                start: `top+=${scrollEnd * shiftOutStart} top`,
-                end: `top+=${scrollEnd * shiftOutEnd} top`,
-                scrub: 0.5,
-              },
-            });
+            // Shift BACK (only for completed periods)
+            if (!period.isOngoing) {
+              gsap.to(trackGroupRef.current, {
+                y: 0,
+                ease: "power3.inOut",
+                scrollTrigger: {
+                  trigger: section,
+                  start: `top+=${scrollEnd * shiftOutStart} top`,
+                  end: `top+=${scrollEnd * shiftOutEnd} top`,
+                  scrub: 0.8,
+                },
+              });
+            }
           }
 
           // --- Branch SVG path reveal (clip-path sweep) ---
-          const path = branchPathRefs.current[pIdx];
-          if (path) {
-            gsap.set(path, { strokeOpacity: 0.5 });
-          }
           const clipRect = clipRectRefs.current[pIdx];
           if (clipRect) {
             gsap.fromTo(
@@ -471,25 +484,27 @@ export default function BranchingTimeline({
             gsap.to(workCardRef.current, {
               opacity: 1,
               y: 0,
-              ease: "power2.out",
+              ease: "power3.out",
               scrollTrigger: {
                 trigger: section,
-                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.02)} top`,
+                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.025)} top`,
                 end: `top+=${scrollEnd * periodStartFrac} top`,
-                scrub: 0.3,
+                scrub: 0.5,
               },
             });
-            gsap.to(workCardRef.current, {
-              opacity: 0,
-              y: 20,
-              ease: "power2.in",
-              scrollTrigger: {
-                trigger: section,
-                start: `top+=${scrollEnd * periodEndFrac} top`,
-                end: `top+=${scrollEnd * Math.min(1, periodEndFrac + 0.02)} top`,
-                scrub: 0.3,
-              },
-            });
+            if (!period.isOngoing) {
+              gsap.to(workCardRef.current, {
+                opacity: 0,
+                y: 20,
+                ease: "power3.in",
+                scrollTrigger: {
+                  trigger: section,
+                  start: `top+=${scrollEnd * periodEndFrac} top`,
+                  end: `top+=${scrollEnd * Math.min(1, periodEndFrac + 0.025)} top`,
+                  scrub: 0.5,
+                },
+              });
+            }
           }
 
           // --- Work card connector show/hide ---
@@ -497,25 +512,27 @@ export default function BranchingTimeline({
             gsap.to(workCardConnectorRef.current, {
               scaleY: 1,
               opacity: 1,
-              ease: "power2.out",
+              ease: "power3.out",
               scrollTrigger: {
                 trigger: section,
-                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.02)} top`,
+                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.025)} top`,
                 end: `top+=${scrollEnd * periodStartFrac} top`,
-                scrub: 0.3,
+                scrub: 0.5,
               },
             });
-            gsap.to(workCardConnectorRef.current, {
-              scaleY: 0,
-              opacity: 0,
-              ease: "power2.in",
-              scrollTrigger: {
-                trigger: section,
-                start: `top+=${scrollEnd * periodEndFrac} top`,
-                end: `top+=${scrollEnd * Math.min(1, periodEndFrac + 0.02)} top`,
-                scrub: 0.3,
-              },
-            });
+            if (!period.isOngoing) {
+              gsap.to(workCardConnectorRef.current, {
+                scaleY: 0,
+                opacity: 0,
+                ease: "power3.in",
+                scrollTrigger: {
+                  trigger: section,
+                  start: `top+=${scrollEnd * periodEndFrac} top`,
+                  end: `top+=${scrollEnd * Math.min(1, periodEndFrac + 0.025)} top`,
+                  scrub: 0.5,
+                },
+              });
+            }
           }
 
           // --- Per-job entry visibility ---
@@ -547,22 +564,71 @@ export default function BranchingTimeline({
               },
             });
 
-            // Fade out
-            gsap.to(entry, {
-              opacity: 0,
-              maxHeight: 0,
-              marginBottom: 0,
-              paddingTop: 0,
-              paddingBottom: 0,
-              ease: "power2.in",
-              scrollTrigger: {
-                trigger: section,
-                start: `top+=${scrollEnd * jobEndFrac} top`,
-                end: `top+=${scrollEnd * Math.min(1, jobEndFrac + 0.01)} top`,
-                scrub: 0.3,
-              },
-            });
+            // Fade out (skip for ongoing jobs)
+            const isJobOngoing = job.work.is_current || !job.work.end_date;
+            if (!isJobOngoing) {
+              gsap.to(entry, {
+                opacity: 0,
+                maxHeight: 0,
+                marginBottom: 0,
+                paddingTop: 0,
+                paddingBottom: 0,
+                ease: "power2.in",
+                scrollTrigger: {
+                  trigger: section,
+                  start: `top+=${scrollEnd * jobEndFrac} top`,
+                  end: `top+=${scrollEnd * Math.min(1, jobEndFrac + 0.01)} top`,
+                  scrub: 0.3,
+                },
+              });
+            }
           });
+        });
+
+        /* ---- Work experience dots ---- */
+        timelineData.allJobs.forEach((job, jIdx) => {
+          const dot = workDotRefs.current[jIdx];
+          if (!dot) return;
+
+          const info = timelineData.jobDotInfo[jIdx];
+          const onMainLine = info.isFirstInPeriod;
+          const dotPct = onMainLine
+            ? job.startPct
+            : Math.max(job.startPct, info.periodStartPct + DIAG_PCT);
+          const dotFrac = dotPct / 100;
+
+          gsap.set(dot, { scale: 0, opacity: 0 });
+
+          gsap.to(dot, {
+            scale: 1,
+            opacity: 1,
+            ease: "back.out(2)",
+            scrollTrigger: {
+              trigger: section,
+              start: `top+=${scrollEnd * Math.max(0, dotFrac - 0.015)} top`,
+              end: `top+=${scrollEnd * dotFrac} top`,
+              scrub: 0.5,
+            },
+          });
+
+          const pulse = dot.querySelector(".work-dot-pulse");
+          if (pulse) {
+            gsap.fromTo(
+              pulse,
+              { scale: 0.5, opacity: 1 },
+              {
+                scale: 3,
+                opacity: 0,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: section,
+                  start: `top+=${scrollEnd * dotFrac} top`,
+                  end: `top+=${scrollEnd * (dotFrac + 0.03)} top`,
+                  scrub: 0.5,
+                },
+              },
+            );
+          }
         });
       }, sectionRef);
 
@@ -608,7 +674,7 @@ export default function BranchingTimeline({
   /*  Desktop: Immersive two-track branching timeline                   */
   /* ================================================================ */
   if (!isMobile && timelineData) {
-    const { markers, eduPositions, workPeriods, allJobs } = timelineData;
+    const { markers, eduPositions, workPeriods, allJobs, jobDotInfo } = timelineData;
 
     return (
       <section
@@ -759,24 +825,42 @@ export default function BranchingTimeline({
                   {workPeriods.map((period, pIdx) => {
                     const x1 = period.startPct;
                     const x2 = period.startPct + DIAG_PCT;
-                    const x3 = Math.max(period.endPct - DIAG_PCT, x2);
-                    const x4 = period.endPct;
                     const mainY = 1;
                     const branchY = BRANCH_Y_OFFSET;
-                    const d = `M ${x1} ${mainY} L ${x2} ${branchY} L ${x3} ${branchY} L ${x4} ${mainY}`;
+                    const forkMidX = (x1 + x2) / 2;
+
+                    let d: string;
+                    if (period.isOngoing) {
+                      d = `M ${x1} ${mainY} C ${forkMidX} ${mainY} ${forkMidX} ${branchY} ${x2} ${branchY} L ${period.endPct} ${branchY}`;
+                    } else {
+                      const x3 = Math.max(period.endPct - DIAG_PCT, x2 + 0.5);
+                      const x4 = period.endPct;
+                      const mergeMidX = (x3 + x4) / 2;
+                      d = `M ${x1} ${mainY} C ${forkMidX} ${mainY} ${forkMidX} ${branchY} ${x2} ${branchY} L ${x3} ${branchY} C ${mergeMidX} ${branchY} ${mergeMidX} ${mainY} ${x4} ${mainY}`;
+                    }
 
                     return (
-                      <path
-                        key={`branch-path-${pIdx}`}
-                        ref={(el) => setBranchPathRef(el, pIdx)}
-                        d={d}
-                        fill="none"
-                        stroke="hsl(var(--cyan))"
-                        strokeWidth={2}
-                        strokeOpacity={0}
-                        vectorEffect="non-scaling-stroke"
-                        clipPath={`url(#branch-clip-${pIdx})`}
-                      />
+                      <g key={`branch-group-${pIdx}`} clipPath={`url(#branch-clip-${pIdx})`}>
+                        <path
+                          d={d}
+                          fill="none"
+                          stroke="hsl(var(--cyan))"
+                          strokeWidth={8}
+                          strokeOpacity={0.12}
+                          strokeLinecap="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                        <path
+                          ref={(el) => setBranchPathRef(el, pIdx)}
+                          d={d}
+                          fill="none"
+                          stroke="hsl(var(--cyan))"
+                          strokeWidth={2}
+                          strokeOpacity={0.9}
+                          strokeLinecap="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </g>
                     );
                   })}
                 </svg>
@@ -796,6 +880,35 @@ export default function BranchingTimeline({
                       }}
                     >
                       <div className="tl-dot-pulse absolute inset-[-6px] rounded-full bg-accent/40" />
+                    </div>
+                  );
+                })}
+
+                {/* Work experience dots — first in period on main line, rest on branch */}
+                {allJobs.map((job, jIdx) => {
+                  const info = jobDotInfo[jIdx];
+                  const onMainLine = info.isFirstInPeriod;
+                  const dotLeft = onMainLine
+                    ? job.startPct
+                    : Math.max(job.startPct, info.periodStartPct + DIAG_PCT);
+                  const dotTop = onMainLine ? 0 : BRANCH_Y_OFFSET;
+
+                  return (
+                    <div
+                      key={`work-dot-${jIdx}`}
+                      ref={(el) => setWorkDotRef(el, jIdx)}
+                      className="absolute w-3.5 h-3.5 rounded-full border-2 bg-background z-20 opacity-0"
+                      style={{
+                        borderColor: "hsl(var(--cyan))",
+                        left: `${dotLeft}%`,
+                        top: `${dotTop}px`,
+                        transform: "translate(-50%, -50%)",
+                      }}
+                    >
+                      <div
+                        className="work-dot-pulse absolute inset-[-5px] rounded-full"
+                        style={{ backgroundColor: "hsl(var(--cyan) / 0.4)" }}
+                      />
                     </div>
                   );
                 })}
