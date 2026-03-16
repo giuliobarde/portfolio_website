@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PrismicRichText } from "@prismicio/react";
 import type { RichTextField } from "@prismicio/client";
 import { sectionHeaderVariants } from "@/lib/animations";
+import WorkExperienceModal from "@/components/v4/WorkExperienceModal";
 import {
   type EducationItem,
   type WorkItem,
@@ -89,6 +90,7 @@ export default function BranchingTimeline({
   const workJobEntryRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedWorkIndex, setSelectedWorkIndex] = useState<number | null>(null);
 
   // Education ref setters
   const setEduCardRef = useCallback((el: HTMLDivElement | null, i: number) => {
@@ -1130,15 +1132,21 @@ export default function BranchingTimeline({
                         const techTags = job.work.technologies
                           ? job.work.technologies.split(",").map((t) => t.trim()).filter(Boolean)
                           : [];
+                        const workIndex = workItems.findIndex(
+                          (w) => w.company === job.work.company && w.position === job.work.position
+                        );
                         return (
                           <div
                             key={`job-${jIdx}`}
                             ref={(el) => setWorkJobEntryRef(el, jIdx)}
-                            className="border-l-2 pl-3 overflow-hidden"
+                            className="border-l-2 pl-3 overflow-hidden cursor-pointer hover:bg-muted/30 rounded-r transition-colors"
                             style={{
                               borderColor: "hsl(var(--cyan) / 0.3)",
                               opacity: 0,
                               maxHeight: 0,
+                            }}
+                            onClick={() => {
+                              if (workIndex !== -1) setSelectedWorkIndex(workIndex);
                             }}
                           >
                             <h4 className="font-mono text-sm font-bold text-foreground">
@@ -1209,6 +1217,17 @@ export default function BranchingTimeline({
             </div>
           </div>
         </div>
+
+        {/* Work Experience Modal */}
+        {selectedWorkIndex !== null && workItems[selectedWorkIndex] && (
+          <WorkExperienceModal
+            experience={workItems[selectedWorkIndex]}
+            experiences={workItems}
+            currentIndex={selectedWorkIndex}
+            onClose={() => setSelectedWorkIndex(null)}
+            onNavigate={(index) => setSelectedWorkIndex(index)}
+          />
+        )}
       </section>
     );
   }
@@ -1282,7 +1301,17 @@ export default function BranchingTimeline({
                     }}
                   />
 
-                  <div className="terminal-card overflow-hidden">
+                  <div
+                    className={`terminal-card overflow-hidden ${!isEdu ? "cursor-pointer hover:border-[hsl(var(--cyan)_/_0.4)] transition-colors" : ""}`}
+                    onClick={() => {
+                      if (!isEdu && work) {
+                        const workIdx = workItems.findIndex(
+                          (w) => w.company === work.company && w.position === work.position
+                        );
+                        if (workIdx !== -1) setSelectedWorkIndex(workIdx);
+                      }
+                    }}
+                  >
                     <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50 bg-muted/30">
                       <div className="flex gap-1">
                         <div className="w-2 h-2 rounded-full bg-red-500/60" />
@@ -1415,6 +1444,17 @@ export default function BranchingTimeline({
           </div>
         </div>
       </div>
+
+      {/* Work Experience Modal */}
+      {selectedWorkIndex !== null && workItems[selectedWorkIndex] && (
+        <WorkExperienceModal
+          experience={workItems[selectedWorkIndex]}
+          experiences={workItems}
+          currentIndex={selectedWorkIndex}
+          onClose={() => setSelectedWorkIndex(null)}
+          onNavigate={(index) => setSelectedWorkIndex(index)}
+        />
+      )}
     </section>
   );
 }

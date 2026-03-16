@@ -5,7 +5,6 @@ import type { RichTextField } from "@prismicio/client";
 import { PrismicRichText } from "@prismicio/react";
 import {
   motion,
-  AnimatePresence,
   useScroll,
   useSpring,
   useMotionValue,
@@ -17,14 +16,10 @@ import {
 import { cn } from "@/lib/utils";
 import {
   sectionHeaderVariants,
-  cardContentStaggerVariants,
-  cardContentItemVariants,
-  techTagVariants,
-  techTagContainerVariants,
   getAlternatingCardVariants,
-  TERMINAL_EASE,
 } from "@/lib/animations";
 import SectionDivider from "@/components/v4/SectionDivider";
+import WorkExperienceModal from "@/components/v4/WorkExperienceModal";
 
 // ── Types ────────────────────────────────────────────────────────────────
 type Experience = {
@@ -165,10 +160,9 @@ const ScrollProgressIndicator: React.FC<{
 const ExperienceCard: React.FC<{
   exp: Experience;
   index: number;
-  isExpanded: boolean;
-  onToggle: () => void;
+  onClick: () => void;
   scrollYProgress: MotionValue<number>;
-}> = ({ exp, index, isExpanded, onToggle, scrollYProgress }) => {
+}> = ({ exp, index, onClick, scrollYProgress }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(cardRef, { once: false, margin: "-45% 0px -45% 0px" });
 
@@ -250,13 +244,10 @@ const ExperienceCard: React.FC<{
           style={{ rotateX: springRotateX, rotateY: springRotateY }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          layout
-          transition={{ layout: { duration: 0.35, ease: TERMINAL_EASE } }}
         >
-          <GlowBorderCard isExpanded={isExpanded} isInViewCenter={isInView}>
-            {/* Compact header — always visible, clickable */}
+          <GlowBorderCard isExpanded={false} isInViewCenter={isInView}>
             <button
-              onClick={onToggle}
+              onClick={onClick}
               className="w-full text-left px-4 py-3 flex items-center gap-3 group cursor-pointer"
             >
               {/* Traffic lights */}
@@ -296,129 +287,27 @@ const ExperienceCard: React.FC<{
                 </span>
               )}
 
-              {/* Chevron */}
-              <motion.svg
-                className="w-4 h-4 text-muted-foreground shrink-0"
+              {/* Open icon */}
+              <svg
+                className="w-4 h-4 text-muted-foreground group-hover:text-accent transition-colors shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                animate={{ rotate: isExpanded ? 180 : 0 }}
-                transition={{ duration: 0.25, ease: TERMINAL_EASE }}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
+                  d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
-              </motion.svg>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v6"
+                />
+              </svg>
             </button>
-
-            {/* Expanded content */}
-            <AnimatePresence initial={false}>
-              {isExpanded && (
-                <motion.div
-                  key="expanded-content"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{
-                    height: { duration: 0.35, ease: TERMINAL_EASE },
-                    opacity: { duration: 0.25, ease: "easeInOut" },
-                  }}
-                  className="overflow-hidden"
-                >
-                  <div className="border-t border-border/50" />
-
-                  <motion.div
-                    className="p-5 space-y-3"
-                    variants={cardContentStaggerVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    {/* Location + date (mobile) */}
-                    <motion.div
-                      variants={cardContentItemVariants}
-                      className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground"
-                    >
-                      {exp.location && (
-                        <span className="flex items-center gap-1">
-                          <svg
-                            className="w-3 h-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                          {exp.location}
-                        </span>
-                      )}
-                      <span className="sm:hidden">
-                        {formatDate(exp.start_date)} —{" "}
-                        {formatDate(exp.end_date, exp.is_current)}
-                      </span>
-                    </motion.div>
-
-                    {/* Description */}
-                    {exp.description && (
-                      <motion.div
-                        variants={cardContentItemVariants}
-                        className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none"
-                      >
-                        <PrismicRichText field={exp.description} />
-                      </motion.div>
-                    )}
-
-                    {/* Achievements */}
-                    {exp.achievements && (
-                      <motion.div
-                        variants={cardContentItemVariants}
-                        className="p-3 rounded bg-muted/30 border border-border/30"
-                      >
-                        <div className="font-mono text-[10px] text-accent/60 mb-1.5">
-                          # key achievements
-                        </div>
-                        <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-li:text-muted-foreground">
-                          <PrismicRichText field={exp.achievements} />
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {/* Tech tags */}
-                    {exp.technologies && (
-                      <motion.div
-                        variants={techTagContainerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex flex-wrap gap-1.5 pt-1"
-                      >
-                        {exp.technologies.split(",").map((tech, i) => (
-                          <motion.span
-                            key={i}
-                            variants={techTagVariants}
-                            className="px-2 py-0.5 rounded font-mono text-[10px] bg-accent/10 text-accent border border-accent/20"
-                          >
-                            {tech.trim()}
-                          </motion.span>
-                        ))}
-                      </motion.div>
-                    )}
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </GlowBorderCard>
         </motion.div>
       </div>
@@ -435,11 +324,8 @@ const WorkExperience: React.FC<WorkExperienceProps> = ({ slice }) => {
       : rawSectionId;
   const experiences = slice.primary.experiences || [];
 
-  // Expand/collapse state — only one at a time
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const handleToggle = useCallback((index: number) => {
-    setExpandedIndex((prev) => (prev === index ? null : index));
-  }, []);
+  // Modal state
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   // Scroll-linked timeline
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -517,14 +403,24 @@ const WorkExperience: React.FC<WorkExperienceProps> = ({ slice }) => {
                   key={index}
                   exp={exp}
                   index={index}
-                  isExpanded={expandedIndex === index}
-                  onToggle={() => handleToggle(index)}
+                  onClick={() => setSelectedIndex(index)}
                   scrollYProgress={scrollYProgress}
                 />
               ))}
             </div>
           </div>
         </div>
+
+        {/* Work Experience Modal */}
+        {selectedIndex !== null && experiences[selectedIndex] && (
+          <WorkExperienceModal
+            experience={experiences[selectedIndex]}
+            experiences={experiences}
+            currentIndex={selectedIndex}
+            onClose={() => setSelectedIndex(null)}
+            onNavigate={(index) => setSelectedIndex(index)}
+          />
+        )}
       </section>
     </>
   );
