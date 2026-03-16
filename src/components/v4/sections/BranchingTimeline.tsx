@@ -479,6 +479,64 @@ export default function BranchingTimeline({
           zoomTl.set(zoomContainerRef.current, {}, 1);
         }
 
+        /* ---- Work card visibility (single timeline for correct reverse) ---- */
+        if (workCardRef.current && zoomSpans.length > 0) {
+          const cardTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: () => `+=${scrollEnd}`,
+              scrub: 0.5,
+            },
+          });
+          cardTl.set(workCardRef.current, { opacity: 0, y: 30 }, 0);
+
+          for (const span of zoomSpans) {
+            const showPos = Math.max(0, span.startFrac - 0.025);
+            cardTl.to(workCardRef.current, {
+              opacity: 1, y: 0,
+              duration: 0.025, ease: "power3.out",
+            }, showPos);
+
+            if (!span.isOngoing) {
+              cardTl.to(workCardRef.current, {
+                opacity: 0, y: 20,
+                duration: 0.025, ease: "power3.in",
+              }, span.endFrac);
+            }
+          }
+          cardTl.set(workCardRef.current, {}, 1);
+        }
+
+        /* ---- Work card connector visibility (single timeline) ---- */
+        if (workCardConnectorRef.current && zoomSpans.length > 0) {
+          const connTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: () => `+=${scrollEnd}`,
+              scrub: 0.5,
+            },
+          });
+          connTl.set(workCardConnectorRef.current, { scaleY: 0, opacity: 0 }, 0);
+
+          for (const span of zoomSpans) {
+            const showPos = Math.max(0, span.startFrac - 0.025);
+            connTl.to(workCardConnectorRef.current, {
+              scaleY: 1, opacity: 1,
+              duration: 0.025, ease: "power3.out",
+            }, showPos);
+
+            if (!span.isOngoing) {
+              connTl.to(workCardConnectorRef.current, {
+                scaleY: 0, opacity: 0,
+                duration: 0.025, ease: "power3.in",
+              }, span.endFrac);
+            }
+          }
+          connTl.set(workCardConnectorRef.current, {}, 1);
+        }
+
         timelineData.workPeriods.forEach((period, pIdx) => {
           const periodStartFrac = period.startPct / 100;
           const periodEndFrac = period.endPct / 100;
@@ -502,65 +560,8 @@ export default function BranchingTimeline({
             );
           }
 
-          // --- Work card show/hide ---
-          if (workCardRef.current) {
-            gsap.to(workCardRef.current, {
-              opacity: 1,
-              y: 0,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: section,
-                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.025)} top`,
-                end: `top+=${scrollEnd * periodStartFrac} top`,
-                scrub: 0.5,
-              },
-            });
-            if (!period.isOngoing) {
-              gsap.to(workCardRef.current, {
-                opacity: 0,
-                y: 20,
-                ease: "power3.in",
-                scrollTrigger: {
-                  trigger: section,
-                  start: `top+=${scrollEnd * periodEndFrac} top`,
-                  end: `top+=${scrollEnd * Math.min(1, periodEndFrac + 0.025)} top`,
-                  scrub: 0.5,
-                },
-              });
-            }
-          }
-
-          // --- Work card connector show/hide ---
-          if (workCardConnectorRef.current) {
-            gsap.to(workCardConnectorRef.current, {
-              scaleY: 1,
-              opacity: 1,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: section,
-                start: `top+=${scrollEnd * Math.max(0, periodStartFrac - 0.025)} top`,
-                end: `top+=${scrollEnd * periodStartFrac} top`,
-                scrub: 0.5,
-              },
-            });
-            if (!period.isOngoing) {
-              gsap.to(workCardConnectorRef.current, {
-                scaleY: 0,
-                opacity: 0,
-                ease: "power3.in",
-                scrollTrigger: {
-                  trigger: section,
-                  start: `top+=${scrollEnd * periodEndFrac} top`,
-                  end: `top+=${scrollEnd * Math.min(1, periodEndFrac + 0.025)} top`,
-                  scrub: 0.5,
-                },
-              });
-            }
-          }
-
-          // --- Per-job entry visibility ---
+          // --- Per-job entry visibility (single timeline per entry) ---
           period.activeJobs.forEach((job) => {
-            // Find the index in allJobs for correct ref
             const jIdx = timelineData.allJobs.findIndex(
               (j) => j.index === job.index,
             );
@@ -570,40 +571,42 @@ export default function BranchingTimeline({
 
             const jobStartFrac = job.startPct / 100;
             const jobEndFrac = job.endPct / 100;
+            const isJobOngoing = job.work.is_current || !job.work.end_date;
 
-            // Fade in
-            gsap.to(entry, {
-              opacity: 1,
-              maxHeight: 200,
-              marginBottom: 12,
-              paddingTop: 4,
-              paddingBottom: 4,
-              ease: "power2.out",
+            const appearBuffer = 0.015;
+            const disappearBuffer = 0.015;
+            const rangeStart = Math.max(0, jobStartFrac - appearBuffer);
+            const rangeEnd = isJobOngoing
+              ? Math.min(1, jobEndFrac + appearBuffer)
+              : Math.min(1, jobEndFrac + disappearBuffer);
+            const totalRange = rangeEnd - rangeStart;
+            const appearPart = Math.min(appearBuffer, totalRange * 0.3) / totalRange;
+            const disappearPart = isJobOngoing
+              ? 0
+              : Math.min(disappearBuffer, totalRange * 0.3) / totalRange;
+
+            const entryTl = gsap.timeline({
               scrollTrigger: {
                 trigger: section,
-                start: `top+=${scrollEnd * Math.max(0, jobStartFrac - 0.01)} top`,
-                end: `top+=${scrollEnd * jobStartFrac} top`,
+                start: `top+=${scrollEnd * rangeStart} top`,
+                end: `top+=${scrollEnd * rangeEnd} top`,
                 scrub: 0.3,
               },
             });
 
-            // Fade out (skip for ongoing jobs)
-            const isJobOngoing = job.work.is_current || !job.work.end_date;
+            entryTl.fromTo(
+              entry,
+              { opacity: 0, maxHeight: 0, overflow: "hidden", marginBottom: 0, paddingTop: 0, paddingBottom: 0 },
+              { opacity: 1, maxHeight: 200, marginBottom: 12, paddingTop: 4, paddingBottom: 4, duration: appearPart, ease: "power2.out" },
+              0,
+            );
+
             if (!isJobOngoing) {
-              gsap.to(entry, {
-                opacity: 0,
-                maxHeight: 0,
-                marginBottom: 0,
-                paddingTop: 0,
-                paddingBottom: 0,
-                ease: "power2.in",
-                scrollTrigger: {
-                  trigger: section,
-                  start: `top+=${scrollEnd * jobEndFrac} top`,
-                  end: `top+=${scrollEnd * Math.min(1, jobEndFrac + 0.01)} top`,
-                  scrub: 0.3,
-                },
-              });
+              entryTl.to(
+                entry,
+                { opacity: 0, maxHeight: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0, duration: disappearPart, ease: "power2.in" },
+                1 - disappearPart,
+              );
             }
           });
         });
