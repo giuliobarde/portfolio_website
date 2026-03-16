@@ -924,12 +924,13 @@ export default function BranchingTimeline({
                     ? job.startPct
                     : Math.max(job.startPct, info.periodStartPct + DIAG_PCT);
                   const dotTop = onMainLine ? 0 : BRANCH_Y_OFFSET;
+                  const tooltipAbove = !onMainLine;
 
                   return (
                     <div
                       key={`work-dot-${jIdx}`}
                       ref={(el) => setWorkDotRef(el, jIdx)}
-                      className="absolute w-3.5 h-3.5 rounded-full border-2 bg-background z-20 opacity-0"
+                      className="absolute w-3.5 h-3.5 rounded-full border-2 bg-background z-20 opacity-0 group/dot pointer-events-auto cursor-pointer"
                       style={{
                         borderColor: "hsl(var(--cyan))",
                         left: `${dotLeft}%`,
@@ -941,6 +942,27 @@ export default function BranchingTimeline({
                         className="work-dot-pulse absolute inset-[-5px] rounded-full"
                         style={{ backgroundColor: "hsl(var(--cyan) / 0.4)" }}
                       />
+                      <div
+                        className={`absolute left-1/2 -translate-x-1/2 opacity-0 group-hover/dot:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 ${
+                          tooltipAbove ? "bottom-full mb-3" : "top-full mt-3"
+                        }`}
+                      >
+                        <div
+                          className="px-2.5 py-1.5 rounded-md font-mono text-[10px] leading-tight border shadow-lg"
+                          style={{
+                            backgroundColor: "hsl(var(--card))",
+                            borderColor: "hsl(var(--cyan) / 0.3)",
+                            color: "hsl(var(--foreground))",
+                          }}
+                        >
+                          <span className="font-semibold">{job.work.position}</span>
+                          {job.work.company && (
+                            <span className="block" style={{ color: "hsl(var(--cyan))" }}>
+                              @ {job.work.company}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
