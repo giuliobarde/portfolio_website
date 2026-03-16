@@ -29,9 +29,19 @@ if (typeof window !== "undefined") {
 /* ------------------------------------------------------------------ */
 
 /** px below main line where the work branch runs */
-const BRANCH_Y_OFFSET = 90;
-/** px the track group shifts up to reveal the branch */
-const ZOOM_SHIFT_PX = 50;
+const BRANCH_Y_OFFSET = 150;
+/** Scale factor when zoomed out to show both tracks */
+const ZOOM_SCALE = 0.65;
+/** Y shift (px) applied alongside scale to center both tracks */
+const ZOOM_Y_SHIFT = -(BRANCH_Y_OFFSET / 2);
+/** Start zooming this fraction before branch appears (proactive) */
+const ZOOM_LEAD = 0.06;
+/** Delay zoom-back this fraction after branch merges */
+const ZOOM_TRAIL = 0.04;
+/** Duration of the zoom transition as a scroll fraction */
+const ZOOM_TRANSITION = 0.04;
+/** Merge work periods within this gap fraction (no zoom flicker) */
+const ZOOM_MERGE_GAP = 0.08;
 /** Horizontal % consumed by the smooth fork/merge curves */
 const DIAG_PCT = 3;
 
@@ -63,6 +73,7 @@ export default function BranchingTimeline({
   const timelineContentRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const trackGroupRef = useRef<HTMLDivElement>(null);
+  const zoomContainerRef = useRef<HTMLDivElement>(null);
 
   // Education refs
   const eduCardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -418,47 +429,59 @@ export default function BranchingTimeline({
           gsap.set(workCardConnectorRef.current, { scaleY: 0, opacity: 0 });
         }
 
+        /* ---- Zoom: merge close work periods into spans, single timeline ---- */
+        interface ZoomSpan { startFrac: number; endFrac: number; isOngoing: boolean }
+        const zoomSpans: ZoomSpan[] = [];
+        for (const period of timelineData.workPeriods) {
+          const sf = period.startPct / 100;
+          const ef = period.endPct / 100;
+          const last = zoomSpans[zoomSpans.length - 1];
+          if (last && (sf - last.endFrac) < ZOOM_MERGE_GAP) {
+            last.endFrac = Math.max(last.endFrac, ef);
+            last.isOngoing = last.isOngoing || period.isOngoing;
+          } else {
+            zoomSpans.push({ startFrac: sf, endFrac: ef, isOngoing: period.isOngoing });
+          }
+        }
+
+        if (zoomContainerRef.current && zoomSpans.length > 0) {
+          const zoomTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: () => `+=${scrollEnd}`,
+              scrub: 0.8,
+            },
+          });
+
+          zoomTl.set(zoomContainerRef.current, { scale: 1, y: 0 }, 0);
+
+          for (const span of zoomSpans) {
+            const zoomInPos = Math.max(0, span.startFrac - ZOOM_LEAD);
+            zoomTl.to(zoomContainerRef.current, {
+              scale: ZOOM_SCALE,
+              y: ZOOM_Y_SHIFT,
+              duration: ZOOM_TRANSITION,
+              ease: "power3.inOut",
+            }, zoomInPos);
+
+            if (!span.isOngoing) {
+              const zoomOutPos = span.endFrac + ZOOM_TRAIL;
+              zoomTl.to(zoomContainerRef.current, {
+                scale: 1,
+                y: 0,
+                duration: ZOOM_TRANSITION,
+                ease: "power3.inOut",
+              }, zoomOutPos);
+            }
+          }
+
+          zoomTl.set(zoomContainerRef.current, {}, 1);
+        }
+
         timelineData.workPeriods.forEach((period, pIdx) => {
           const periodStartFrac = period.startPct / 100;
           const periodEndFrac = period.endPct / 100;
-
-          // --- Zoom/shift: animate track group up to reveal branch ---
-          const shiftInStart = Math.max(0, periodStartFrac - 0.03);
-          const shiftInEnd = periodStartFrac;
-          const shiftOutStart = periodEndFrac;
-          const shiftOutEnd = Math.min(1, periodEndFrac + 0.03);
-
-          if (trackGroupRef.current) {
-            // Shift UP
-            gsap.fromTo(
-              trackGroupRef.current,
-              { y: 0 },
-              {
-                y: -ZOOM_SHIFT_PX,
-                ease: "power3.inOut",
-                scrollTrigger: {
-                  trigger: section,
-                  start: `top+=${scrollEnd * shiftInStart} top`,
-                  end: `top+=${scrollEnd * shiftInEnd} top`,
-                  scrub: 0.8,
-                },
-              },
-            );
-
-            // Shift BACK (only for completed periods)
-            if (!period.isOngoing) {
-              gsap.to(trackGroupRef.current, {
-                y: 0,
-                ease: "power3.inOut",
-                scrollTrigger: {
-                  trigger: section,
-                  start: `top+=${scrollEnd * shiftOutStart} top`,
-                  end: `top+=${scrollEnd * shiftOutEnd} top`,
-                  scrub: 0.8,
-                },
-              });
-            }
-          }
 
           // --- Branch SVG path reveal (clip-path sweep) ---
           const clipRect = clipRectRefs.current[pIdx];
@@ -717,6 +740,12 @@ export default function BranchingTimeline({
 
           {/* Timeline area */}
           <div className="flex-1 relative overflow-hidden">
+            {/* Zoom container — scales down when timeline branches */}
+            <div
+              ref={zoomContainerRef}
+              className="absolute inset-0 will-change-transform"
+              style={{ transformOrigin: "center 50%" }}
+            >
             {/* Fixed center playhead */}
             <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 z-40 pointer-events-none flex flex-col items-center">
               <div className="flex-1 w-px bg-gradient-to-b from-transparent via-accent/10 to-accent/25" />
@@ -1129,6 +1158,9 @@ export default function BranchingTimeline({
                 </div>
               </div>
             </div>
+
+            </div>
+            {/* End zoom container */}
 
             {/* Scroll hint */}
             <div
