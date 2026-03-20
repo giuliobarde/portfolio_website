@@ -24,11 +24,17 @@ export default function V4LayoutWrapper({
   webIconUrl,
   userName,
   version = "v4",
+  resumeText,
+  resumeUrl,
+  websiteVersions,
 }: {
   children: React.ReactNode;
   webIconUrl?: string;
   userName?: string;
   version?: "v3" | "v4";
+  resumeText?: string;
+  resumeUrl?: string;
+  websiteVersions?: string[];
 }) {
   return (
     <div
@@ -44,7 +50,7 @@ export default function V4LayoutWrapper({
         disableTransitionOnChange={false}
       >
         <BackgroundEffects />
-        <Navbar webIconUrl={webIconUrl} userName={userName} currentVersion={version} />
+        <Navbar webIconUrl={webIconUrl} userName={userName} currentVersion={version} resumeText={resumeText} resumeUrl={resumeUrl} websiteVersions={websiteVersions} />
         <main className="relative">{children}</main>
 
         {/* Terminal-style footer */}
