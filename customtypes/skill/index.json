@@ -1,0 +1,39 @@
+{
+  "format": "custom",
+  "id": "skill",
+  "label": "Skill",
+  "repeatable": true,
+  "status": true,
+  "json": {
+    "Main": {
+      "uid": {
+        "type": "UID",
+        "config": {
+          "label": "UID"
+        }
+      },
+      "name": {
+        "type": "Text",
+        "config": {
+          "label": "Name",
+          "placeholder": "e.g. Python"
+        }
+      },
+      "category": {
+        "type": "Select",
+        "config": {
+          "label": "Category",
+          "options": ["ML", "Web", "Tools", "Research", "Other"],
+          "default_value": "Other"
+        }
+      },
+      "color_hex": {
+        "type": "Text",
+        "config": {
+          "label": "Color Hex",
+          "placeholder": "#3B82F6"
+        }
+      }
+    }
+  }
+}
