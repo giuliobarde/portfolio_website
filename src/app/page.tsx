@@ -6,5 +6,5 @@ export default async function Page() {
   const settings = await client.getSingle("settings");
   const version = settings.data.version;
 
-  redirect(version === "v4" ? "/v4" : "/v3");
+  redirect(version === "v3" ? "/v3" : "/v4");
 }
