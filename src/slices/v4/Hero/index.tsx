@@ -111,7 +111,7 @@ const Hero: FC<HeroProps> = ({ slice }) => {
                     </svg>
                   </a>
                   <a
-                    href="#about"
+                    href="#about_me"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-border bg-card hover:bg-muted hover:border-accent/30 font-mono text-sm font-medium transition-all"
                   >
                     <span>./about_me</span>

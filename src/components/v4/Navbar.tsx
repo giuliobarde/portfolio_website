@@ -8,7 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { VersionToggle } from "./VersionToggle";
 
 const navItems = [
-  { name: "about me", href: "#home" },
+  { name: "about me", href: "#about_me" },
   { name: "timeline", href: "#timeline" },
   { name: "skills", href: "#skills" },
   { name: "projects", href: "#projects" },
