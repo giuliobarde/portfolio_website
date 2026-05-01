@@ -1,0 +1,450 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e5]:
+      - link "Giulio Bardelli" [ref=e6] [cursor=pointer]:
+        - /url: "#home"
+        - generic [ref=e7]: Giulio Bardelli
+      - generic [ref=e9]:
+        - link "./about me" [ref=e10] [cursor=pointer]:
+          - /url: "#about_me"
+          - generic [ref=e11]: ./about me
+        - link "./timeline" [ref=e12] [cursor=pointer]:
+          - /url: "#timeline"
+          - generic [ref=e13]: ./timeline
+        - link "./skills" [ref=e14] [cursor=pointer]:
+          - /url: "#skills"
+          - generic [ref=e15]: ./skills
+        - link "./projects" [ref=e16] [cursor=pointer]:
+          - /url: "#projects"
+          - generic [ref=e17]: ./projects
+      - generic [ref=e18]:
+        - link "Resume" [ref=e19] [cursor=pointer]:
+          - /url: https://my-portfolio-3.cdn.prismic.io/my-portfolio-3/aetKHcBOoF08xRpW_GiulioBardelliResume2.pdf
+          - text: Resume
+          - img [ref=e20]
+        - button "Switch website version" [ref=e24] [cursor=pointer]:
+          - generic [ref=e25]: ~
+          - generic [ref=e26]: v4
+          - img [ref=e27]
+  - main [ref=e30]:
+    - generic [ref=e32]:
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e41]: ~/portfolio
+          - generic [ref=e43]: $ cat intro.md
+        - generic [ref=e47]:
+          - generic [ref=e48]: scroll
+          - img [ref=e49]
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: // about
+          - heading "About Me" [level=2] [ref=e56]
+        - generic [ref=e57]:
+          - generic [ref=e59]:
+            - generic [ref=e65]: avatar.png
+            - generic [ref=e68]:
+              - generic [ref=e69]:
+                - generic [ref=e70]: CS
+                - generic [ref=e71]: Major
+              - generic [ref=e72]:
+                - generic [ref=e73]: DS
+                - generic [ref=e74]: Focus
+          - generic [ref=e76]:
+            - generic [ref=e82]: README.md
+            - generic [ref=e83]:
+              - generic [ref=e84]:
+                - paragraph [ref=e85]: Hi!👋
+                - paragraph [ref=e86]: My name is Giulio Bardelli, and I’m a recent computer science graduate from St. John's University, currently pursuing my master’s in data science. I’m based in New York City🗽, but I was born and raised in the beautiful city of Florence, Italy! 🇮🇹 ➡ 🇺🇸
+                - paragraph [ref=e87]: During my undergrad, I was heavily involved on campus, especially in my fraternity, Pi Lambda Phi. Beyond my passion for technology and artificial intelligence, some of my interests include fashion👔 and cooking🍳, and my favorite color is purple! 🟣
+              - generic [ref=e88]:
+                - generic [ref=e89]: $ cat interests.txt
+                - generic [ref=e90]:
+                  - generic [ref=e91]: ▸ Machine Learning & Deep Learning
+                  - generic [ref=e92]: ▸ Data Analysis & Visualization
+                  - generic [ref=e93]: ▸ Full-Stack Development
+                  - generic [ref=e94]: ▸ Algorithm Design
+              - link "$ Resume" [ref=e95] [cursor=pointer]:
+                - /url: https://my-portfolio-3.cdn.prismic.io/my-portfolio-3/Z7Zy8Z7c43Q3f_W1_GiulioBardelliresume.pdf
+                - generic [ref=e96]: $
+                - text: Resume
+                - img [ref=e97]
+      - generic [ref=e100]:
+        - generic [ref=e103]:
+          - generic [ref=e104]: // timeline
+          - heading "Education & Experience" [level=2] [ref=e105]
+          - paragraph [ref=e106]: Academic background and professional journey
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e109]:
+              - generic:
+                - generic [ref=e110]:
+                  - generic:
+                    - generic: "2021"
+                  - generic:
+                    - generic: "2022"
+                  - generic:
+                    - generic: "2023"
+                  - generic:
+                    - generic: "2024"
+                  - generic:
+                    - generic: "2025"
+                  - generic:
+                    - generic: "2026"
+                - img
+                - generic [ref=e118] [cursor=pointer]:
+                  - generic:
+                    - generic:
+                      - text: Italian Tutor
+                      - generic: "@ St. John's University"
+                - generic [ref=e120] [cursor=pointer]:
+                  - generic:
+                    - generic:
+                      - text: Receptionist
+                      - generic: "@ St. John's University"
+                - generic [ref=e122] [cursor=pointer]:
+                  - generic:
+                    - generic:
+                      - text: Student Researcher
+                      - generic: "@ St John's University"
+                - generic [ref=e124] [cursor=pointer]:
+                  - generic:
+                    - generic:
+                      - text: Software Engineering Fellow
+                      - generic: "@ Headstarter AI"
+                - generic [ref=e126] [cursor=pointer]:
+                  - generic:
+                    - generic:
+                      - text: Software Engineering Intern
+                      - generic: "@ TechX"
+                - generic [ref=e128] [cursor=pointer]:
+                  - generic:
+                    - generic:
+                      - text: Research Graduate Assistant
+                      - generic: "@ St John's University"
+                - generic [ref=e130] [cursor=pointer]:
+                  - generic:
+                    - generic:
+                      - text: Data Science Intern
+                      - generic: "@ MS Transverse"
+            - generic:
+              - generic:
+                - generic: aug 2020 — may 2021
+                - generic [ref=e133]:
+                  - generic [ref=e139]: hopkinton-high-school.edu
+                  - generic [ref=e141]:
+                    - heading "High School Diploma" [level=3] [ref=e142]
+                    - generic [ref=e143]:
+                      - generic [ref=e144]: Hopkinton High School
+                      - generic [ref=e145]:
+                        - img [ref=e146]
+                        - text: Hopkinton, MA
+              - generic:
+                - generic: aug 2021 — jan 2025
+                - generic [ref=e150]:
+                  - generic [ref=e156]: st.-john's-university.edu
+                  - generic [ref=e157]:
+                    - generic [ref=e158]:
+                      - heading "Bachelor of Science" [level=3] [ref=e159]
+                      - paragraph [ref=e160]: Computer Science
+                      - generic [ref=e161]:
+                        - generic [ref=e162]: St. John's University
+                        - generic [ref=e163]:
+                          - img [ref=e164]
+                          - text: Queens, NY
+                    - generic [ref=e168]: "GPA: 3.69/4.0"
+              - generic:
+                - generic: jan 2025 — present
+                - generic [ref=e170]:
+                  - generic [ref=e176]: st.-john's-university.edu
+                  - generic [ref=e177]:
+                    - generic [ref=e178]:
+                      - heading "Master of Science" [level=3] [ref=e179]
+                      - paragraph [ref=e180]: Data Science
+                      - generic [ref=e181]:
+                        - generic [ref=e182]: St. John's University
+                        - generic [ref=e183]:
+                          - img [ref=e184]
+                          - text: Queens, NY
+                    - generic [ref=e188]: "GPA: 4.0/4.0"
+              - generic [ref=e190]:
+                - generic [ref=e196]: work-experience.dev
+                - generic [ref=e197]:
+                  - generic:
+                    - heading "Italian Tutor" [level=4] [ref=e198] [cursor=pointer]
+                    - paragraph [ref=e199] [cursor=pointer]: "@ St. John's University"
+                    - text: aug 2022 — may 2025
+                    - generic [ref=e200] [cursor=pointer]: · New York, NY
+                  - generic:
+                    - heading "Receptionist" [level=4] [ref=e201] [cursor=pointer]
+                    - paragraph [ref=e202] [cursor=pointer]: "@ St. John's University"
+                    - text: jan 2023 — may 2025
+                    - generic [ref=e203] [cursor=pointer]: · New York, NY
+                  - generic:
+                    - heading "Student Researcher" [level=4] [ref=e204] [cursor=pointer]
+                    - paragraph [ref=e205] [cursor=pointer]: "@ St John's University"
+                    - text: jan 2024 — aug 2025
+                    - generic [ref=e206] [cursor=pointer]: · New York, NY
+                  - generic:
+                    - heading "Software Engineering Fellow" [level=4] [ref=e207] [cursor=pointer]
+                    - paragraph [ref=e208] [cursor=pointer]: "@ Headstarter AI"
+                    - text: jul 2024 — sep 2024
+                    - generic [ref=e209] [cursor=pointer]: · Remote
+                  - generic:
+                    - heading "Software Engineering Intern" [level=4] [ref=e210] [cursor=pointer]
+                    - paragraph [ref=e211] [cursor=pointer]: "@ TechX"
+                    - text: may 2025 — aug 2025
+                    - generic [ref=e212] [cursor=pointer]: · Remote
+                  - generic:
+                    - heading "Research Graduate Assistant" [level=4] [ref=e213] [cursor=pointer]
+                    - paragraph [ref=e214] [cursor=pointer]: "@ St John's University"
+                    - text: aug 2025 — present
+                    - generic [ref=e215] [cursor=pointer]: · New York, NY
+                  - generic:
+                    - heading "Data Science Intern" [level=4] [ref=e216] [cursor=pointer]
+                    - paragraph [ref=e217] [cursor=pointer]: "@ MS Transverse"
+                    - text: jan 2026 — present
+                    - generic [ref=e218] [cursor=pointer]: · New York, NY
+          - generic [ref=e220]: scroll to explore
+      - generic [ref=e225]:
+        - generic [ref=e226]:
+          - generic [ref=e227]: // skills
+          - heading "Technical Skills" [level=2] [ref=e228]
+          - generic [ref=e229]:
+            - paragraph [ref=e230]:
+              - text: I have been coding for the greater part of a decade, and my passion lies in building AI-driven applications that push the boundaries of what technology can do. Over the years, I’ve worked with various programming languages and frameworks, but lately, I’ve been mainly developing applications using
+              - strong [ref=e231]: Next.js
+              - text: and
+              - strong [ref=e232]: Python
+              - text: . You can see my skills in this cloud of words I generated using TagCloud😄.
+            - paragraph
+        - generic [ref=e233]:
+          - generic [ref=e234]:
+            - generic [ref=e240]: languages.config
+            - generic [ref=e241]:
+              - heading "Languages" [level=3] [ref=e242]
+              - generic [ref=e243]:
+                - generic [ref=e244]:
+                  - generic [ref=e245]: "01"
+                  - generic [ref=e247]: R
+                - generic [ref=e250]:
+                  - generic [ref=e251]: "02"
+                  - generic [ref=e253]: Python
+                - generic [ref=e256]:
+                  - generic [ref=e257]: "03"
+                  - generic [ref=e259]: Java
+                - generic [ref=e262]:
+                  - generic [ref=e263]: "04"
+                  - generic [ref=e265]: TypeScript
+                - generic [ref=e268]:
+                  - generic [ref=e269]: "05"
+                  - generic [ref=e271]: JavaScript
+                - generic [ref=e274]:
+                  - generic [ref=e275]: "06"
+                  - generic [ref=e277]: CSS3
+                - generic [ref=e280]:
+                  - generic [ref=e281]: "07"
+                  - generic [ref=e283]: HTML5
+              - generic [ref=e286]: 7 items
+          - generic [ref=e287]:
+            - generic [ref=e293]: ml-data.config
+            - generic [ref=e294]:
+              - heading "ML / Data" [level=3] [ref=e295]
+              - generic [ref=e296]:
+                - generic [ref=e297]:
+                  - generic [ref=e298]: "01"
+                  - generic [ref=e300]: Langchain
+                - generic [ref=e303]:
+                  - generic [ref=e304]: "02"
+                  - generic [ref=e306]: Langgraph
+                - generic [ref=e309]:
+                  - generic [ref=e310]: "03"
+                  - generic [ref=e312]: Huggingface
+                - generic [ref=e315]:
+                  - generic [ref=e316]: "04"
+                  - generic [ref=e318]: OpenRouter
+                - generic [ref=e321]:
+                  - generic [ref=e322]: "05"
+                  - generic [ref=e324]: OpenAI
+              - generic [ref=e327]: 5 items
+          - generic [ref=e328]:
+            - generic [ref=e334]: web-frameworks.config
+            - generic [ref=e335]:
+              - heading "Web / Frameworks" [level=3] [ref=e336]
+              - generic [ref=e337]:
+                - generic [ref=e338]:
+                  - generic [ref=e339]: "01"
+                  - generic [ref=e341]: TailWindCSS
+                - generic [ref=e344]:
+                  - generic [ref=e345]: "02"
+                  - generic [ref=e347]: Bootstrap
+                - generic [ref=e350]:
+                  - generic [ref=e351]: "03"
+                  - generic [ref=e353]: Next.js
+                - generic [ref=e356]:
+                  - generic [ref=e357]: "04"
+                  - generic [ref=e359]: React
+                - generic [ref=e362]:
+                  - generic [ref=e363]: "05"
+                  - generic [ref=e365]: fastapi
+                - generic [ref=e368]:
+                  - generic [ref=e369]: "06"
+                  - generic [ref=e371]: node
+              - generic [ref=e374]: 6 items
+          - generic [ref=e375]:
+            - generic [ref=e381]: tools-infra.config
+            - generic [ref=e382]:
+              - heading "Tools / Infra" [level=3] [ref=e383]
+              - generic [ref=e384]:
+                - generic [ref=e385]:
+                  - generic [ref=e386]: "01"
+                  - generic [ref=e388]: Cloudflare
+                - generic [ref=e391]:
+                  - generic [ref=e392]: "02"
+                  - generic [ref=e394]: GSAP
+                - generic [ref=e397]:
+                  - generic [ref=e398]: "03"
+                  - generic [ref=e400]: ThreeJS
+                - generic [ref=e403]:
+                  - generic [ref=e404]: "04"
+                  - generic [ref=e406]: Jupyter Notebook
+                - generic [ref=e409]:
+                  - generic [ref=e410]: "05"
+                  - generic [ref=e412]: BitBucket
+                - generic [ref=e415]:
+                  - generic [ref=e416]: "06"
+                  - generic [ref=e418]: Material UI
+                - generic [ref=e421]:
+                  - generic [ref=e422]: "07"
+                  - generic [ref=e424]: Stripe
+                - generic [ref=e427]:
+                  - generic [ref=e428]: "08"
+                  - generic [ref=e430]: Clerk
+                - generic [ref=e433]:
+                  - generic [ref=e434]: "09"
+                  - generic [ref=e436]: AWS S3
+                - generic [ref=e439]:
+                  - generic [ref=e440]: "10"
+                  - generic [ref=e442]: Vercel
+                - generic [ref=e445]:
+                  - generic [ref=e446]: "11"
+                  - generic [ref=e448]: MySQL
+                - generic [ref=e451]:
+                  - generic [ref=e452]: "12"
+                  - generic [ref=e454]: GitHub
+                - generic [ref=e457]:
+                  - generic [ref=e458]: "13"
+                  - generic [ref=e460]: Git
+                - generic [ref=e463]:
+                  - generic [ref=e464]: "14"
+                  - generic [ref=e466]: Firebase
+                - generic [ref=e469]:
+                  - generic [ref=e470]: "15"
+                  - generic [ref=e472]: Prismic
+              - generic [ref=e475]: 15 items
+        - generic [ref=e476]: $ wc -l skills.txt 33 total
+      - generic [ref=e477]: Could not find a component for Slice type “certifications”
+      - generic [ref=e480]:
+        - generic [ref=e481]:
+          - generic [ref=e482]: // projects
+          - heading "Projects" [level=2] [ref=e483]
+          - paragraph [ref=e485]: Here is a display of some of my projects
+        - generic [ref=e486]:
+          - generic [ref=e487]:
+            - generic [ref=e488]: $
+            - generic [ref=e489]: ls ./projects
+            - generic [ref=e490]: "|"
+            - generic [ref=e491]: showing 1 of 14
+          - generic [ref=e494]:
+            - button "View details for 📰 MedDigest" [ref=e496] [cursor=pointer]:
+              - generic [ref=e502]: 📰-meddigest.md
+              - generic [ref=e504]:
+                - heading "📰 MedDigest" [level=3] [ref=e505]
+                - paragraph [ref=e507]: Co-developed MedDigest as part of my summer internship at TechX
+                - generic [ref=e509]: Next.js TypeScript TailwindCSS Python FastAPI Gmail API Groq Langchain Firebase Firestore ArXive API
+                - generic [ref=e510]:
+                  - generic [ref=e511]: $
+                  - generic [ref=e512]: view
+                  - img [ref=e513]
+            - button "View details for 👔 Attierly" [ref=e516] [cursor=pointer]:
+              - generic [ref=e522]: 👔-attierly.md
+              - generic [ref=e524]:
+                - heading "👔 Attierly" [level=3] [ref=e525]
+                - paragraph [ref=e527]: Modern AI-powered Wardrobe organizer
+                - generic [ref=e529]: Next.js TypeScript TailwindCSS Python FastAPI Langchain OpenAI WeatherAPI
+                - generic [ref=e530]:
+                  - generic [ref=e531]: $
+                  - generic [ref=e532]: view
+                  - img [ref=e533]
+            - generic:
+              - button "View details for 💼 Portfolio Website 3":
+                - generic:
+                  - generic: 💼-portfolio-website-3.md
+                - generic:
+                  - heading "💼 Portfolio Website 3" [level=3]
+                  - generic:
+                    - paragraph: A modernized version of my portfolio website showcasing my development skills and projects.
+                  - generic:
+                    - generic: Next.js TypeScript GSAP TailwindCSS Prsmic Three.js Tagcloud
+                  - generic:
+                    - generic: $
+                    - generic: view
+                    - img
+            - generic:
+              - button "View details for 📚 Text Processing":
+                - generic:
+                  - generic: 📚-text-processing.md
+                - generic:
+                  - heading "📚 Text Processing" [level=3]
+                  - generic:
+                    - paragraph: Developed a text processing software as the capstone project for my Advanced Data Structures class.
+                  - generic:
+                    - generic: Java
+                  - generic:
+                    - generic: $
+                    - generic: view
+                    - img
+            - button "View details for 👟 Sneakerhead Application" [ref=e536] [cursor=pointer]:
+              - generic [ref=e542]: 👟-sneakerhead-application.md
+              - generic [ref=e543]:
+                - heading "👟 Sneakerhead Application" [level=3] [ref=e544]
+                - paragraph [ref=e546]: A web application designed to help users visualize and manage their sneaker collections was developed as part of my Software Design Methods class project.
+                - generic [ref=e548]: JavaScript HTML5 CSS3 PHP MySQL
+                - generic [ref=e549]:
+                  - generic [ref=e550]: $
+                  - generic [ref=e551]: view
+                  - img [ref=e552]
+          - generic [ref=e554]:
+            - button "Previous project" [ref=e555] [cursor=pointer]:
+              - img [ref=e556]
+              - generic [ref=e558]: prev
+            - generic [ref=e559]:
+              - button "Go to project 1" [ref=e560] [cursor=pointer]
+              - button "Go to project 2" [ref=e561] [cursor=pointer]
+              - button "Go to project 3" [ref=e562] [cursor=pointer]
+              - button "Go to project 4" [ref=e563] [cursor=pointer]
+              - button "Go to project 5" [ref=e564] [cursor=pointer]
+              - button "Go to project 6" [ref=e565] [cursor=pointer]
+              - button "Go to project 7" [ref=e566] [cursor=pointer]
+              - button "Go to project 8" [ref=e567] [cursor=pointer]
+              - button "Go to project 9" [ref=e568] [cursor=pointer]
+              - button "Go to project 10" [ref=e569] [cursor=pointer]
+              - button "Go to project 11" [ref=e570] [cursor=pointer]
+              - button "Go to project 12" [ref=e571] [cursor=pointer]
+              - button "Go to project 13" [ref=e572] [cursor=pointer]
+              - button "Go to project 14" [ref=e573] [cursor=pointer]
+            - button "Next project" [ref=e574] [cursor=pointer]:
+              - generic [ref=e575]: next
+              - img [ref=e576]
+          - generic [ref=e578]:
+            - generic [ref=e579]:
+              - generic [ref=e580]: ←
+              - generic [ref=e581]: →
+              - generic [ref=e582]: navigate
+            - generic [ref=e583]: "|"
+            - generic [ref=e584]:
+              - generic [ref=e585]: ↵
+              - generic [ref=e586]: select
+  - contentinfo [ref=e587]:
+    - generic [ref=e588]:
+      - paragraph [ref=e589]: $ echo "Built with Next.js + Prismic"
+      - paragraph [ref=e590]: "> 2026 — All rights reserved"
